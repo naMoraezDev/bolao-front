@@ -1,17 +1,20 @@
 'use client'
 
 import type { Match, Guess } from '@/lib/types'
+import type { MatchOdds } from '@/lib/odds'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import OddsDisplay from './OddsDisplay'
 
 interface MatchCardProps {
   match: Match
   guess?: Guess
   onGuessChange?: (matchId: string, homeGoals: number, awayGoals: number) => void
   saving?: boolean
+  odds?: MatchOdds | null
 }
 
-export default function MatchCard({ match, guess, onGuessChange, saving }: MatchCardProps) {
+export default function MatchCard({ match, guess, onGuessChange, saving, odds }: MatchCardProps) {
   const matchDate = new Date(match.date)
 
   const isFinished = match.finished
@@ -113,8 +116,16 @@ export default function MatchCard({ match, guess, onGuessChange, saving }: Match
         </div>
       </div>
 
-      {match.stadium && (
-        <p className="mt-3 text-xs text-gray-300">{match.stadium}</p>
+      {(match.stadium || (!isFinished && odds)) && (
+        <div className="mt-3 flex items-center gap-2">
+          {match.stadium && <span className="text-xs text-gray-300">{match.stadium}</span>}
+          {!isFinished && odds && (
+            <>
+              {match.stadium && <span className="text-gray-200">·</span>}
+              <OddsDisplay odds={odds} />
+            </>
+          )}
+        </div>
       )}
 
       {guess?.score !== undefined && isFinished && (

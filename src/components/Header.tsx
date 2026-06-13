@@ -13,7 +13,7 @@ const navLinks = [
 export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, loading, signOut } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-line shadow-sm">
@@ -52,7 +52,12 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          {user ? (
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-24 h-4 rounded-md bg-gray-200 animate-pulse" />
+              <div className="w-16 h-8 rounded-normal bg-gray-200 animate-pulse" />
+            </div>
+          ) : user ? (
             <>
               <span className="hidden sm:block text-sm text-gray-600 truncate max-w-[120px]">
                 {user.email}

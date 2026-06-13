@@ -22,6 +22,11 @@ export default async function ClassificacaoPage({
 
   const tabs = [
     {
+      label: "Detalhes",
+      value: "detalhes",
+      href: `/pools/${poolSlug}/leagues/${leagueSlug}`,
+    },
+    {
       label: "Palpites",
       value: "palpites",
       href: `/pools/${poolSlug}/leagues/${leagueSlug}/palpites`,

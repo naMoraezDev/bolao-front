@@ -2,6 +2,8 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import Tabs from "@/components/Tabs";
 import ParticipantsList from "@/components/ParticipantsList";
+import LeagueInviteButton from "@/components/LeagueInviteButton";
+import LeagueBadge from "@/components/LeagueBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +61,11 @@ export default async function LeaguePage({
 
   const tabs = [
     {
+      label: "Detalhes",
+      value: "detalhes",
+      href: `/pools/${poolSlug}/leagues/${leagueSlug}`,
+    },
+    {
       label: "Palpites",
       value: "palpites",
       href: `/pools/${poolSlug}/leagues/${leagueSlug}/palpites`,
@@ -109,7 +116,7 @@ export default async function LeaguePage({
 
       {/* League Header */}
       <div className="bg-white rounded-lg border border-line p-6 md:p-8 mb-6">
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0">
             <svg
               width="28"
@@ -126,10 +133,16 @@ export default async function LeaguePage({
               />
             </svg>
           </div>
-          <div className="flex-1">
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-black-lance mb-1">
-              {league.name}
-            </h1>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-black-lance truncate">
+                  {league.name}
+                </h1>
+                <LeagueBadge accessRules={league.accessRules} />
+              </div>
+              <LeagueInviteButton leagueSlug={leagueSlug} />
+            </div>
           </div>
         </div>
       </div>

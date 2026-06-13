@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { api } from "@/lib/api"
 import type { League } from "@/lib/types"
+import JoinLeagueButton from "@/components/JoinLeagueButton"
 
 export const dynamic = "force-dynamic"
 
@@ -14,13 +15,16 @@ export default async function PublicLeaguesPage() {
 
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold text-black-lance mb-2">
-          Ligas Públicas
-        </h1>
-        <p className="text-gray-300 text-sm">
-          Participe de ligas abertas e dispute com outros torcedores.
-        </p>
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-black-lance mb-2">
+            Ligas Públicas
+          </h1>
+          <p className="text-gray-300 text-sm">
+            Participe de ligas abertas e dispute com outros torcedores.
+          </p>
+        </div>
+        <JoinLeagueButton />
       </div>
 
       {leagues.length > 0 ? (

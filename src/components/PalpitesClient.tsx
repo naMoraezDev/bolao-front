@@ -5,18 +5,21 @@ import { api } from '@/lib/api'
 import MatchCard from '@/components/MatchCard'
 import { useAuth } from '@/contexts/auth'
 import type { Match, Guess } from '@/lib/types'
+import type { MatchOdds } from '@/lib/odds'
 
 interface PalpitesClientProps {
   matches: Match[]
   poolSlug: string
   leagueSlug: string
+  oddsMap?: Record<string, MatchOdds | null>
 }
 
-export default function PalpitesClient({ matches, poolSlug, leagueSlug }: PalpitesClientProps) {
+export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap }: PalpitesClientProps) {
   const { user, loading: authLoading } = useAuth()
   const [guesses, setGuesses] = useState<Record<string, Guess>>({})
   const [savingMatches, setSavingMatches] = useState<Record<string, boolean>>({})
   const [participants, setParticipants] = useState<{ id: string; name?: string }[]>([])
+  const [participantsLoading, setParticipantsLoading] = useState(true)
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug }: Palpit
       .getParticipants(poolSlug, leagueSlug)
       .then((data) => setParticipants(data.items ?? []))
       .catch(() => {})
+      .finally(() => setParticipantsLoading(false))
   }, [poolSlug, leagueSlug, user, authLoading])
 
   const handleGuessChange = useCallback(
@@ -89,6 +93,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug }: Palpit
             key={match.id}
             match={match}
             guess={guesses[match.id]}
+            odds={oddsMap?.[match.id] ?? null}
             {...(interactive ? { onGuessChange: handleGuessChange, saving: savingMatches[match.id] } : {})}
           />
         ))}
@@ -222,27 +227,38 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug }: Palpit
             </>
           )}
 
-          {participants.length > 0 && (
+          {(participantsLoading || participants.length > 0) && (
             <div className={`bg-white rounded-lg border border-line overflow-hidden ${finishedMatches.length > 0 ? 'mt-4' : ''}`}>
               <div className="px-4 py-3 border-b border-line">
-                <h2 className="font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                  Participantes ({participants.length})
-                </h2>
+                {participantsLoading ? (
+                  <div className="w-28 h-3 rounded bg-gray-200 animate-pulse" />
+                ) : (
+                  <h2 className="font-semibold text-gray-500 text-xs uppercase tracking-wide">
+                    Participantes ({participants.length})
+                  </h2>
+                )}
               </div>
               <div className="divide-y divide-line">
-                {participants.slice(0, 5).map((p) => (
-                  <div key={p.id} className="px-4 py-2.5 flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-green-cover-bg flex items-center justify-center flex-shrink-0">
-                      <span className="text-[11px] font-bold text-green">
-                        {(p.name ?? '?')[0]?.toUpperCase()}
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium text-table-text truncate">
-                      {p.name ?? 'Anônimo'}
-                    </span>
-                  </div>
-                ))}
-                {participants.length > 5 && (
+                {participantsLoading
+                  ? [1, 2, 3].map((i) => (
+                      <div key={i} className="px-4 py-2.5 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-gray-200 animate-pulse" />
+                        <div className="w-28 h-3 rounded bg-gray-200 animate-pulse" />
+                      </div>
+                    ))
+                  : participants.slice(0, 5).map((p) => (
+                      <div key={p.id} className="px-4 py-2.5 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-green-cover-bg flex items-center justify-center flex-shrink-0">
+                          <span className="text-[11px] font-bold text-green">
+                            {(p.name ?? '?')[0]?.toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium text-table-text truncate">
+                          {p.name ?? 'Anônimo'}
+                        </span>
+                      </div>
+                    ))}
+                {!participantsLoading && participants.length > 5 && (
                   <div className="px-4 py-2.5 text-center">
                     <span className="text-xs text-gray-300">
                       e mais {participants.length - 5}

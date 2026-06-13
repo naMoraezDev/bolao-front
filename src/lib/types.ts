@@ -22,6 +22,7 @@ export interface League {
   faq?: Record<string, unknown>
   pool?: { id: string; name: string; slug: string }
   pools?: { pool: { id: string; name: string; slug: string } }[]
+  accessRules?: { rule: 'PUBLIC' | 'INVITE_CODE' }[]
 }
 
 export interface Match {
@@ -83,6 +84,46 @@ export interface Participant {
   name?: string
   avatarUrl?: string
   joinedAt: string
+}
+
+export interface CreatedLeague {
+  id: string
+  name: string
+  slug: string
+  pool: { id: string; name: string; slug: string }
+}
+
+export interface LeagueInvite {
+  code: string
+  expiresAt: string
+}
+
+export interface JoinedLeague {
+  joinedAt: string
+  league: {
+    id: string
+    name: string
+    slug: string
+    pools: { pool: { id: string; name: string; slug: string } }[]
+  }
+}
+
+export interface UserLeague {
+  id: string
+  name: string
+  slug: string
+  creatorId?: string | null
+  pools: { pool: { id: string; name: string; slug: string } }[]
+  defaultForPools: { id: string; name: string; slug: string }[]
+  accessRules: { rule: 'PUBLIC' | 'INVITE_CODE' }[]
+}
+
+export interface AvailableLeague {
+  id: string
+  name: string
+  slug: string
+  creatorId?: string
+  pools: { pool: { id: string; name: string; slug: string } }[]
 }
 
 export interface ApiResponse<T> {

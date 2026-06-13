@@ -49,10 +49,15 @@ export default function ParticipantsList({
     return (
       <div className="bg-white rounded-lg border border-line overflow-hidden">
         <div className="px-6 py-4 border-b border-line">
-          <h2 className="font-semibold text-gray-500 text-sm">Participantes</h2>
+          <div className="w-28 h-4 rounded bg-gray-200 animate-pulse" />
         </div>
-        <div className="p-6 text-center">
-          <p className="text-gray-300 text-sm">Carregando...</p>
+        <div className="divide-y divide-line">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="px-6 py-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+              <div className="w-32 h-4 rounded bg-gray-200 animate-pulse" />
+            </div>
+          ))}
         </div>
       </div>
     )

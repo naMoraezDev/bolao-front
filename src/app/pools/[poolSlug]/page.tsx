@@ -1,7 +1,7 @@
 import Link from "next/link"
-import LeagueCard from "@/components/LeagueCard"
 import { api } from "@/lib/api"
-import type { PoolDetails, League } from "@/lib/types"
+import PoolLeagueManager from "@/components/PoolLeagueManager"
+import type { PoolDetails } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
 
@@ -37,8 +37,6 @@ export default async function PoolDetailPage({
       </div>
     )
   }
-
-  const allLeagues = pool?.defaultLeague ? [pool.defaultLeague] : []
 
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-10">
@@ -80,31 +78,7 @@ export default async function PoolDetailPage({
       </div>
 
       {/* Leagues Section */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl font-bold text-black-lance">
-            Ligas
-          </h2>
-        </div>
-
-        {allLeagues.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allLeagues.map((league) => (
-              <LeagueCard
-                key={league.id}
-                league={{ ...league, isDefaultLeague: true }}
-                poolSlug={poolSlug}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg border border-line p-8 text-center">
-            <p className="text-gray-300 text-sm">
-              Nenhuma liga disponível neste bolão.
-            </p>
-          </div>
-        )}
-      </section>
+      <PoolLeagueManager poolSlug={poolSlug} poolName={pool.name} defaultLeague={pool.defaultLeague} />
     </div>
   )
 }

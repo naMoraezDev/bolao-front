@@ -1,4 +1,4 @@
-import type { ApiResponse, League, LeaderboardEntry, LeaderboardEntryDetail, Participant, Pool, PoolDetails, Guess, PoolMatchesData } from './types'
+import type { ApiResponse, League, LeaderboardEntry, LeaderboardEntryDetail, Participant, Pool, PoolDetails, Guess, PoolMatchesData, CreatedLeague, LeagueInvite, JoinedLeague, UserLeague, AvailableLeague } from './types'
 import { getAuthToken } from './auth-token'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3019'
@@ -46,6 +46,25 @@ export const api = {
         `/pools/${poolSlug}/leagues/${leagueSlug}/participants`
       ),
     listPublic: () => fetchApi<League[]>('/leagues/public'),
+    create: (poolSlug: string, name: string) =>
+      fetchApi<CreatedLeague>(`/pools/${poolSlug}/leagues`, {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      }),
+    createInvite: (leagueSlug: string) =>
+      fetchApi<LeagueInvite>(`/leagues/${leagueSlug}/invite`, {
+        method: 'POST',
+      }),
+    joinByCode: (code: string) =>
+      fetchApi<JoinedLeague>('/leagues/participants', {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      }),
+  },
+
+  user: {
+    leagues: () => fetchApi<UserLeague[]>('/user/leagues'),
+    availableLeagues: () => fetchApi<AvailableLeague[]>('/user/leagues/available'),
   },
 
   guesses: {

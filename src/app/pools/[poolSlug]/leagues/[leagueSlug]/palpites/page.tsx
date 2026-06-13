@@ -2,6 +2,7 @@ import Link from "next/link"
 import { api } from "@/lib/api"
 import Tabs from "@/components/Tabs"
 import PalpitesClient from "@/components/PalpitesClient"
+import { fetchOdds, findMatchOdds, getSportKeyFromPool, type MatchOdds } from "@/lib/odds"
 import type { Match, League } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
@@ -25,6 +26,11 @@ export default async function PalpitesPage({
 
   const tabs = [
     {
+      label: "Detalhes",
+      value: "detalhes",
+      href: `/pools/${poolSlug}/leagues/${leagueSlug}`,
+    },
+    {
       label: "Palpites",
       value: "palpites",
       href: `/pools/${poolSlug}/leagues/${leagueSlug}/palpites`,
@@ -38,6 +44,19 @@ export default async function PalpitesPage({
 
   const finishedMatches = matches.filter((m) => m.finished)
   const pendingMatches = matches.filter((m) => !m.finished)
+
+  const oddsMap: Record<string, MatchOdds | null> = {}
+  if (matches.length > 0) {
+    const sportKey = getSportKeyFromPool(poolSlug)
+    const events = await fetchOdds(sportKey)
+
+    console.log(`[Odds] Matching ${pendingMatches.length} pending matches against ${events.length} events (sport=${sportKey})`)
+    for (const match of pendingMatches) {
+      const matchOdds = events.length > 0 ? findMatchOdds(events, match.homeTeam.name, match.awayTeam.name) : null
+      console.log(`[Odds] Match "${match.homeTeam.name} vs ${match.awayTeam.name}":`, matchOdds ? `${matchOdds.homeWin} / ${matchOdds.draw} / ${matchOdds.awayWin} (${matchOdds.bookmaker})` : 'no odds found')
+      oddsMap[match.id] = matchOdds
+    }
+  }
 
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-10">
@@ -109,7 +128,7 @@ export default async function PalpitesPage({
       </div>
 
       {/* Matches */}
-      <PalpitesClient matches={matches} poolSlug={poolSlug} leagueSlug={leagueSlug} />
+      <PalpitesClient matches={matches} poolSlug={poolSlug} leagueSlug={leagueSlug} oddsMap={oddsMap} />
     </div>
   )
 }
