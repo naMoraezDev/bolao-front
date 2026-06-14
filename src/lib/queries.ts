@@ -100,6 +100,21 @@ export function useUserStats(poolSlug: string, leagueSlug: string) {
   })
 }
 
+export function usePublicUserStats(poolSlug: string, leagueSlug: string, token: string | null) {
+  return useQuery({
+    queryKey: [...queryKeys.user.all, 'public', 'stats', poolSlug, leagueSlug, token] as const,
+    queryFn: () => api.public.getStats(poolSlug, leagueSlug, token!),
+    enabled: !!poolSlug && !!leagueSlug && !!token,
+  })
+}
+
+export function useCreateShareToken() {
+  return useMutation({
+    mutationFn: ({ poolSlug, leagueSlug, expiresInDays }: { poolSlug: string; leagueSlug: string; expiresInDays?: number }) =>
+      api.user.createShareToken(poolSlug, leagueSlug, expiresInDays),
+  })
+}
+
 export function useGuessesList(poolSlug: string, leagueSlug: string, enabled = true) {
   return useQuery({
     queryKey: queryKeys.guesses.list(poolSlug, leagueSlug),

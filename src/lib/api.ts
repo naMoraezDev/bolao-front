@@ -72,6 +72,11 @@ export const api = {
     availableLeagues: () => fetchApi<AvailableLeague[]>('/user/leagues/available'),
     getStats: (poolSlug: string, leagueSlug: string) =>
       fetchApi<UserStats>(`/user/pools/${poolSlug}/leagues/${leagueSlug}/leaderboard/stats`),
+    createShareToken: (poolSlug: string, leagueSlug: string, expiresInDays?: number) =>
+      fetchApi<{ token: string; expiresAt: number }>(
+        `/user/pools/${poolSlug}/leagues/${leagueSlug}/stats/share-token`,
+        { method: 'POST', body: JSON.stringify({ expiresInDays }) }
+      ),
   },
 
   guesses: {
@@ -82,6 +87,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(guess),
       }),
+  },
+
+  public: {
+    getStats: (poolSlug: string, leagueSlug: string, token: string) =>
+      fetchApi<UserStats>(`/public/pools/${poolSlug}/leagues/${leagueSlug}/stats/${token}`),
   },
 
   leaderboard: {

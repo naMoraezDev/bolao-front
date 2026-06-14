@@ -8,6 +8,7 @@ import { QueryProvider } from "@/lib/query-provider"
 export const metadata: Metadata = {
   title: "Lance! Bolão - Aposte e Ganhe",
   description: "Plataforma de bolão de campeonatos de futebol do Lance!",
+  icons: { icon: "/favicon.ico" },
 }
 
 export default function RootLayout({
