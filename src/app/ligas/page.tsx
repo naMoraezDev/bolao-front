@@ -2,6 +2,7 @@ import Link from "next/link"
 import { api } from "@/lib/api"
 import type { League } from "@/lib/types"
 import JoinLeagueButton from "@/components/JoinLeagueButton"
+import AdBanner from "@/components/AdBanner"
 
 export const dynamic = "force-dynamic"
 
@@ -27,6 +28,12 @@ export default async function PublicLeaguesPage() {
         <JoinLeagueButton />
       </div>
 
+      <div className="mb-6">
+        <AdBanner variant="horizontal" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
       {leagues.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {leagues.map((league) => {
@@ -36,7 +43,7 @@ export default async function PublicLeaguesPage() {
                 key={league.id}
                 href={
                   firstPool
-                    ? `/pools/${firstPool.slug}/leagues/${league.slug}`
+                    ? `/bolao/${firstPool.slug}/ligas/${league.slug}`
                     : "#"
                 }
                 className="group block bg-white rounded-lg border border-line p-5 hover:shadow-card hover:border-green/20 transition-all duration-200 no-underline"
@@ -83,10 +90,19 @@ export default async function PublicLeaguesPage() {
             href="/"
             className="text-sm font-semibold text-green hover:text-green-hover transition-colors"
           >
-            Voltar para Home
+            Voltar para Início
           </Link>
         </div>
       )}
+
+        </div>
+
+        <div className="hidden lg:block">
+          <div className="lg:sticky lg:top-20">
+            <AdBanner variant="square" />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

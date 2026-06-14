@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/auth'
-import { api } from '@/lib/api'
+import { useLeaderboardRanking } from '@/lib/queries'
+import FadeIn from './FadeIn'
 import type { LeaderboardEntry } from '@/lib/types'
 import LeaderboardTable from './LeaderboardTable'
 import Link from 'next/link'
@@ -15,20 +15,9 @@ export default function RankingSection({
   leagueSlug: string
 }) {
   const { user } = useAuth()
-  const [ranking, setRanking] = useState<LeaderboardEntry[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: rankingData, isLoading: loading } = useLeaderboardRanking(poolSlug, leagueSlug)
 
-  useEffect(() => {
-    if (!user) {
-      setLoading(false)
-      return
-    }
-    api.leaderboard
-      .getRanking(poolSlug, leagueSlug)
-      .then((data) => setRanking(data?.items ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [user, poolSlug, leagueSlug])
+  const ranking: LeaderboardEntry[] = rankingData?.items ?? []
 
   if (!user) {
     return (
@@ -51,19 +40,15 @@ export default function RankingSection({
     )
   }
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg border border-line p-12 text-center">
-        <p className="text-gray-300 text-sm">Carregando...</p>
-      </div>
-    )
-  }
-
-  return ranking.length > 0 ? (
-    <LeaderboardTable entries={ranking} />
-  ) : (
-    <div className="bg-white rounded-lg border border-line p-12 text-center">
-      <p className="text-gray-300 text-sm">Nenhum participante no ranking ainda.</p>
-    </div>
+  return (
+    <FadeIn show={!loading}>
+      {ranking.length > 0 ? (
+        <LeaderboardTable entries={ranking} poolSlug={poolSlug} leagueSlug={leagueSlug} />
+      ) : (
+        <div className="bg-white rounded-lg border border-line p-12 text-center">
+          <p className="text-gray-300 text-sm">Nenhum participante no ranking ainda.</p>
+        </div>
+      )}
+    </FadeIn>
   )
 }

@@ -2,34 +2,66 @@ import Link from 'next/link'
 import type { Pool } from '@/lib/types'
 
 export default function PoolCard({ pool }: { pool: Pool }) {
+  const hasIcon = !!pool.icon
+
   return (
     <Link
-      href={`/pools/${pool.slug}`}
-      className="group block bg-white rounded-lg border border-line p-5 hover:shadow-card hover:border-green/20 transition-all duration-200 no-underline"
+      href={`/bolao/${pool.slug}`}
+      className={`group block rounded-lg border p-5 hover:shadow-card transition-all duration-200 no-underline relative overflow-hidden ${
+        hasIcon
+          ? 'border-white/10 hover:border-white/20'
+          : 'bg-white border-line hover:border-green/20'
+      }`}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-cover-bg flex items-center justify-center group-hover:bg-green-cover-btn transition-colors">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-green">
-              <rect x="2" y="2" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-500 group-hover:text-green transition-colors">
-              {pool.name}
-            </h3>
-            <span className="text-xs text-gray-300">
-              /{pool.slug}
-            </span>
-          </div>
-        </div>
+      {hasIcon && (
+        <>
+          <div className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style={{ backgroundImage: `url(${pool.icon})` }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
+        </>
+      )}
 
-        <div className="flex items-center gap-1 text-gray-300 group-hover:text-green transition-colors">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
+      <div className="relative z-10 flex items-center justify-between h-full gap-2">
+        {hasIcon ? (
+          <>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-white truncate">
+                {pool.name}
+              </h3>
+              <span className="text-xs text-white/60">
+                Faça seus palpites
+              </span>
+            </div>
+            <div className="flex items-center flex-shrink-0 text-white/50 group-hover:text-white transition-colors">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-14 h-14 rounded-lg bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:bg-green-cover-btn transition-colors">
+                <svg width="28" height="28" viewBox="0 0 20 20" fill="none" className="text-green">
+                  <rect x="2" y="2" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="1.5" />
+                  <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-gray-500 truncate group-hover:text-green transition-colors">
+                  {pool.name}
+                </h3>
+                <span className="text-xs text-gray-300">
+                  Faça seus palpites
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center flex-shrink-0 text-gray-300 group-hover:text-green transition-colors">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </>
+        )}
       </div>
     </Link>
   )

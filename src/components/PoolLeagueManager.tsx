@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { api } from '@/lib/api'
+import { motion } from 'framer-motion'
+import { useUserLeagues } from '@/lib/queries'
 import { useAuth } from '@/contexts/auth'
 import CreateLeagueModal from './CreateLeagueModal'
 import JoinLeagueModal from './JoinLeagueModal'
@@ -17,36 +18,17 @@ interface PoolLeagueManagerProps {
 
 export default function PoolLeagueManager({ poolSlug, poolName, defaultLeague }: PoolLeagueManagerProps) {
   const { user } = useAuth()
-  const [leagues, setLeagues] = useState<UserLeague[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: leaguesData, isLoading: loading, refetch } = useUserLeagues()
   const [showCreate, setShowCreate] = useState(false)
   const [showJoin, setShowJoin] = useState(false)
 
-  function loadLeagues() {
-    if (!user) {
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    api.user
-      .leagues()
-      .then((data) => {
-        const list = Array.isArray(data) ? data : []
-        setLeagues(
-          list.filter(
-            (l) =>
-              l.pools?.some((p) => p.pool.slug === poolSlug) ||
-              l.defaultForPools?.some((p) => p.slug === poolSlug),
-          ),
-        )
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => {
-    loadLeagues()
-  }, [user])
+  const leagues: UserLeague[] = user
+    ? (Array.isArray(leaguesData) ? leaguesData : []).filter(
+        (l) =>
+          l.pools?.some((p) => p.pool.slug === poolSlug) ||
+          l.defaultForPools?.some((p) => p.slug === poolSlug),
+      )
+    : []
 
   const visibleLeagues = defaultLeague
     ? [defaultLeague, ...leagues.filter((l) => l.id !== defaultLeague.id)]
@@ -96,11 +78,16 @@ export default function PoolLeagueManager({ poolSlug, poolName, defaultLeague }:
           ))}
         </div>
       ) : !showEmptyState ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {visibleLeagues.map((league) => (
             <Link
               key={league.id}
-              href={`/pools/${poolSlug}/leagues/${league.slug}`}
+              href={`/bolao/${poolSlug}/ligas/${league.slug}`}
               className="group block bg-white rounded-lg border border-line p-5 hover:shadow-card hover:border-green/20 transition-all duration-200 no-underline"
             >
               <div className="flex items-start justify-between">
@@ -128,7 +115,7 @@ export default function PoolLeagueManager({ poolSlug, poolName, defaultLeague }:
               </div>
             </Link>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <div className="bg-white rounded-lg border border-line p-8 text-center">
           <p className="text-gray-300 text-sm">
@@ -141,13 +128,13 @@ export default function PoolLeagueManager({ poolSlug, poolName, defaultLeague }:
         poolSlug={poolSlug}
         open={showCreate}
         onClose={() => setShowCreate(false)}
-        onCreated={loadLeagues}
+        onCreated={() => refetch()}
       />
       <JoinLeagueModal
         open={showJoin}
         onClose={() => {
           setShowJoin(false)
-          loadLeagues()
+          refetch()
         }}
       />
     </section>

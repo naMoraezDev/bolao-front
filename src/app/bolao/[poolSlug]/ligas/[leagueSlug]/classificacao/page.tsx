@@ -2,6 +2,7 @@ import Link from "next/link"
 import { api } from "@/lib/api"
 import Tabs from "@/components/Tabs"
 import RankingSection from "@/components/RankingSection"
+import AdBanner from "@/components/AdBanner"
 import type { League } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
@@ -24,17 +25,22 @@ export default async function ClassificacaoPage({
     {
       label: "Detalhes",
       value: "detalhes",
-      href: `/pools/${poolSlug}/leagues/${leagueSlug}`,
+      href: `/bolao/${poolSlug}/ligas/${leagueSlug}/detalhes`,
     },
     {
       label: "Palpites",
       value: "palpites",
-      href: `/pools/${poolSlug}/leagues/${leagueSlug}/palpites`,
+      href: `/bolao/${poolSlug}/ligas/${leagueSlug}/palpites`,
     },
     {
       label: "Classificação",
       value: "classificacao",
-      href: `/pools/${poolSlug}/leagues/${leagueSlug}/classificacao`,
+      href: `/bolao/${poolSlug}/ligas/${leagueSlug}/classificacao`,
+    },
+    {
+      label: "Estatísticas",
+      value: "estatisticas",
+      href: `/bolao/${poolSlug}/ligas/${leagueSlug}/estatisticas`,
     },
   ]
 
@@ -43,19 +49,19 @@ export default async function ClassificacaoPage({
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
         <Link href="/" className="hover:text-green transition-colors no-underline">
-          Home
+          Início
         </Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <Link href="/pools" className="hover:text-green transition-colors no-underline">
+        <Link href="/bolao" className="hover:text-green transition-colors no-underline">
           Bolões
         </Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <Link href={`/pools/${poolSlug}`} className="hover:text-green transition-colors no-underline">
-          {poolSlug}
+        <Link href={`/bolao/${poolSlug}`} className="hover:text-green transition-colors no-underline">
+          {league?.pool?.name ?? poolSlug}
         </Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -66,14 +72,21 @@ export default async function ClassificacaoPage({
       {/* Header */}
       <div className="bg-white rounded-lg border border-line p-6 mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0">
-            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" className="text-green">
-              <path d="M10 2L12.5 7L18 7.6L14 11.4L15 17L10 14.5L5 17L6 11.4L2 7.6L7.5 7L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-            </svg>
+          <div className="w-16 h-16 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {league?.pool?.icon ? (
+              <img src={league.pool.icon} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 20 20" fill="none" className="text-green">
+                <path d="M10 2L12.5 7L18 7.6L14 11.4L15 17L10 14.5L5 17L6 11.4L2 7.6L7.5 7L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              </svg>
+            )}
           </div>
           <div className="flex-1">
+            <p className="text-xs text-gray-300 mb-0.5">
+              {league?.pool?.name ?? poolSlug}
+            </p>
             <h1 className="font-display text-2xl font-bold text-black-lance mb-1">
-              Classificação - {league?.name ?? leagueSlug}
+              {league?.name ?? leagueSlug}
             </h1>
           </div>
         </div>
@@ -86,6 +99,10 @@ export default async function ClassificacaoPage({
 
       {/* Leaderboard */}
       <RankingSection poolSlug={poolSlug} leagueSlug={leagueSlug} />
+
+      <div className="mt-6">
+        <AdBanner variant="horizontal" />
+      </div>
     </div>
   )
 }

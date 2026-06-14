@@ -1,35 +1,43 @@
 'use client'
 
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'Bolões', href: '/pools' },
-  { label: 'Ligas Públicas', href: '/leagues' },
+  { label: 'Início', href: '/' },
+  { label: 'Bolões', href: '/bolao' },
+  { label: 'Ligas Públicas', href: '/ligas' },
 ]
 
 export default function Header() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading, signOut } = useAuth()
 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-line shadow-sm">
       <div className="max-w-[1340px] mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 no-underline">
-          <div className="w-8 h-8 bg-green rounded-lg flex items-center justify-center">
-            <span className="text-white font-display font-bold text-sm">L</span>
-          </div>
-          <div>
-            <span className="font-display font-bold text-lg text-black-lance leading-tight">
-              Lance!
-            </span>
-            <span className="font-display text-lg text-green font-bold leading-tight ml-0.5">
-              Bolão
-            </span>
-          </div>
+        <Link href="/" className="flex items-center no-underline">
+          <img
+            src="https://lncimg.lance.com.br/cdn-cgi/image/width=93,height=24,quality=75,fit=pad,format=webp,background=transparent/assets/lance-global/v1/logo-lance.svg"
+            alt="Lance!"
+            className="h-6 w-auto object-contain"
+          />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
@@ -54,21 +62,53 @@ export default function Header() {
         <div className="flex items-center gap-3">
           {loading ? (
             <div className="flex items-center gap-2">
-              <div className="w-24 h-4 rounded-md bg-gray-200 animate-pulse" />
-              <div className="w-16 h-8 rounded-normal bg-gray-200 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
             </div>
           ) : user ? (
-            <>
-              <span className="hidden sm:block text-sm text-gray-600 truncate max-w-[120px]">
-                {user.email}
-              </span>
+            <div className="relative" ref={menuRef}>
               <button
-                onClick={() => signOut()}
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 border border-line text-sm font-medium rounded-normal hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="w-8 h-8 rounded-full bg-green-cover-bg flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green/10 hover:ring-green/30 transition-all cursor-pointer border-none"
               >
-                Sair
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-green">
+                    {(user.displayName ?? user.email ?? '?')[0].toUpperCase()}
+                  </span>
+                )}
               </button>
-            </>
+
+              <AnimatePresence>
+                {menuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-10 w-52 bg-white rounded-xl border border-line shadow-lg py-2 z-50 origin-top-right"
+                  >
+                    <div className="px-4 py-3 border-b border-line">
+                      <p className="text-sm font-semibold text-gray-500 truncate">
+                        {user.displayName ?? 'Usuário'}
+                      </p>
+                      <p className="text-xs text-gray-300 truncate mt-0.5">
+                        {user.email ?? ''}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => { signOut(); setMenuOpen(false) }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-widget hover:bg-red-50 transition-colors cursor-pointer border-none"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 13H3.5C2.7 13 2 12.3 2 11.5V4.5C2 3.7 2.7 3 3.5 3H6M10.5 11L13.5 8L10.5 5M13.5 8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      Sair
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <button
               onClick={() => router.push('/auth')}

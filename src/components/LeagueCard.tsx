@@ -10,7 +10,7 @@ export default function LeagueCard({
 }) {
   return (
     <Link
-      href={`/pools/${poolSlug}/leagues/${league.slug}`}
+      href={`/bolao/${poolSlug}/ligas/${league.slug}`}
       className="group block bg-white rounded-lg border border-line p-5 hover:shadow-card hover:border-green/20 transition-all duration-200 no-underline"
     >
       <div className="flex items-start justify-between">

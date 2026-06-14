@@ -2,6 +2,7 @@ export interface Pool {
   id: string
   name: string
   slug: string
+  icon?: string
 }
 
 export interface PoolDetails extends Pool {
@@ -20,8 +21,8 @@ export interface League {
   template?: Record<string, unknown>
   info?: Record<string, unknown>
   faq?: Record<string, unknown>
-  pool?: { id: string; name: string; slug: string }
-  pools?: { pool: { id: string; name: string; slug: string } }[]
+  pool?: { id: string; name: string; slug: string; icon?: string }
+  pools?: { pool: { id: string; name: string; slug: string; icon?: string } }[]
   accessRules?: { rule: 'PUBLIC' | 'INVITE_CODE' }[]
 }
 
@@ -64,6 +65,7 @@ export interface LeaderboardEntry {
   position?: number
   avatarUrl?: string
   exactGuesses: number
+  totalGuesses: number
   encrypted?: string
 }
 
@@ -81,6 +83,7 @@ export interface LeaderboardEntryDetail {
 
 export interface Participant {
   id: string
+  userId: string
   name?: string
   avatarUrl?: string
   joinedAt: string
@@ -131,6 +134,22 @@ export interface ApiResponse<T> {
   data?: T
   error?: { code: string; message: string; details?: unknown }
   meta?: { timestamp: string; requestId?: string; cached?: boolean }
+}
+
+export interface UserStats {
+  name: string
+  avatarUrl: string
+  totalGuesses: number
+  totalEntries: number
+  exact: number
+  partial: number
+  miss: number
+  totalScore: number
+  avgScore: number
+  maxScore: number
+  minScore: number
+  successRate: number
+  position: number
 }
 
 export interface PoolMatchesData {

@@ -3,6 +3,7 @@ import "./globals.css"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { AuthProvider } from "@/contexts/auth"
+import { QueryProvider } from "@/lib/query-provider"
 
 export const metadata: Metadata = {
   title: "Lance! Bolão - Aposte e Ganhe",
@@ -17,13 +18,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full">
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   )

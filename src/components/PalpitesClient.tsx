@@ -1,47 +1,40 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { api } from '@/lib/api'
+import { useGuessesList, useCreateGuess } from '@/lib/queries'
 import MatchCard from '@/components/MatchCard'
+import AdBanner from '@/components/AdBanner'
 import { useAuth } from '@/contexts/auth'
 import type { Match, Guess } from '@/lib/types'
-import type { MatchOdds } from '@/lib/odds'
+import { translatePhase } from '@/lib/phases'
 
 interface PalpitesClientProps {
   matches: Match[]
   poolSlug: string
   leagueSlug: string
-  oddsMap?: Record<string, MatchOdds | null>
+  currentRound?: string
+  phases?: string[]
+  currentPhase?: string
 }
 
-export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap }: PalpitesClientProps) {
+export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentRound, phases: rawPhases, currentPhase }: PalpitesClientProps) {
   const { user, loading: authLoading } = useAuth()
+  const { data: guessesData } = useGuessesList(poolSlug, leagueSlug, !!user && !authLoading)
+  const createGuessMutation = useCreateGuess()
+
   const [guesses, setGuesses] = useState<Record<string, Guess>>({})
   const [savingMatches, setSavingMatches] = useState<Record<string, boolean>>({})
-  const [participants, setParticipants] = useState<{ id: string; name?: string }[]>([])
-  const [participantsLoading, setParticipantsLoading] = useState(true)
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   useEffect(() => {
-    if (authLoading || !user) return
-
-    api.guesses
-      .listByUser(poolSlug, leagueSlug)
-      .then((data) => {
-        const map: Record<string, Guess> = {}
-        data.forEach((g) => {
-          map[g.matchId] = g
-        })
-        setGuesses(map)
+    if (guessesData && !showDebug) {
+      const map: Record<string, Guess> = {}
+      guessesData.forEach((g: Guess) => {
+        map[g.matchId] = g
       })
-      .catch(() => {})
-
-    api.leagues
-      .getParticipants(poolSlug, leagueSlug)
-      .then((data) => setParticipants(data.items ?? []))
-      .catch(() => {})
-      .finally(() => setParticipantsLoading(false))
-  }, [poolSlug, leagueSlug, user, authLoading])
+      setGuesses(map)
+    }
+  }, [guessesData])
 
   const handleGuessChange = useCallback(
     (matchId: string, homeGoals: number, awayGoals: number) => {
@@ -54,10 +47,10 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
       timers.current[matchId] = setTimeout(async () => {
         setSavingMatches((prev) => ({ ...prev, [matchId]: true }))
         try {
-          await api.guesses.create(poolSlug, leagueSlug, {
-            matchId,
-            homeGoals,
-            awayGoals,
+          await createGuessMutation.mutateAsync({
+            poolSlug,
+            leagueSlug,
+            guess: { matchId, homeGoals, awayGoals },
           })
         } catch {
           // silently fail — user can retry by typing again
@@ -66,7 +59,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
         }
       }, 600)
     },
-    [poolSlug, leagueSlug],
+    [poolSlug, leagueSlug, createGuessMutation],
   )
 
   useEffect(() => {
@@ -75,15 +68,93 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
     }
   }, [])
 
-  const rounds = Array.from(
-    new Set(matches.map((m) => m.round).filter(Boolean) as string[]),
+  const phases = (rawPhases ?? []).filter(Boolean)
+  const hasPhases = phases.length > 0
+
+  const defaultPhase = hasPhases
+    ? (currentPhase && phases.includes(currentPhase)
+        ? currentPhase
+        : phases.find((p) => matches.some((m) => !m.finished && m.phase === p))
+          ?? phases[0]
+          ?? null)
+    : null
+
+  const [selectedPhase, setSelectedPhase] = useState<string | null>(defaultPhase)
+
+  const phaseMatches = hasPhases && selectedPhase
+    ? matches.filter((m) => m.phase === selectedPhase)
+    : matches
+
+  const roundsInPhase = Array.from(
+    new Set(phaseMatches.map((m) => m.round).filter(Boolean) as string[]),
   ).sort((a, b) => Number(a) - Number(b))
+
+  const meaningfulRounds = roundsInPhase.filter((r) => r !== '0')
+  const showRoundSelector = hasPhases ? meaningfulRounds.length > 0 : roundsInPhase.length > 0
+  const displayRounds = hasPhases ? meaningfulRounds : roundsInPhase
+
+  const currentRoundStr = currentRound != null ? String(currentRound) : undefined
+
   const [selectedRound, setSelectedRound] = useState<string | null>(null)
 
-  const pendingMatches = selectedRound
-    ? matches.filter((m) => !m.finished && m.round === selectedRound)
-    : matches.filter((m) => !m.finished)
-  const finishedMatches = matches.filter((m) => m.finished)
+  useEffect(() => {
+    if (!showRoundSelector) {
+      setSelectedRound(null)
+    } else {
+      const defaultRd = displayRounds.find(
+        (r) => phaseMatches.some((m) => !m.finished && m.round === r),
+      ) ?? (currentRoundStr && displayRounds.includes(currentRoundStr) ? currentRoundStr : null)
+        ?? (displayRounds.length > 0 ? displayRounds[0] : null)
+      setSelectedRound((prev) => (prev && displayRounds.includes(prev) ? prev : defaultRd))
+    }
+  }, [selectedPhase, showRoundSelector])
+
+  const effectiveRound = showRoundSelector ? selectedRound : null
+
+  const pendingMatches = effectiveRound
+    ? phaseMatches.filter((m) => !m.finished && m.round === effectiveRound)
+    : phaseMatches.filter((m) => !m.finished)
+
+  const finishedMatches = effectiveRound
+    ? phaseMatches.filter((m) => m.finished && m.round === effectiveRound)
+    : phaseMatches.filter((m) => m.finished)
+
+  // --- debug: ?debug=mixed|all-finished|all-pending ---
+  const [debugState, setDebugState] = useState<string | null>(null)
+  useEffect(() => {
+    const d = new URLSearchParams(window.location.search).get('debug')
+    setDebugState(d)
+  }, [])
+  const showDebug = debugState === 'mixed' || debugState === 'all-finished' || debugState === 'all-pending'
+  const forceMixed = debugState === 'mixed'
+  const forceAllFinished = debugState === 'all-finished'
+  const forceAllPending = debugState === 'all-pending'
+
+  const finalPending: Match[] = forceAllFinished ? [] : forceAllPending ? [...pendingMatches, ...finishedMatches] : pendingMatches
+  const finalFinished: Match[] = forceAllFinished ? [...finishedMatches, ...pendingMatches] : forceAllPending ? [] : finishedMatches
+  const displayPending = finalPending
+  const displayFinished = forceMixed
+    ? finishedMatches.length > 3
+      ? finishedMatches.slice(0, 3)
+      : finishedMatches
+    : finalFinished
+
+  useEffect(() => {
+    if (!showDebug) return
+    const matchesInPhase = effectiveRound
+      ? phaseMatches.filter((m) => m.round === effectiveRound)
+      : phaseMatches
+    const fakeGuesses: Record<string, Guess> = {}
+    matchesInPhase.forEach((m, i) => {
+      fakeGuesses[m.id] = {
+        matchId: m.id,
+        homeGoals: 1 + (i % 3),
+        awayGoals: 1,
+        score: i % 3 === 0 ? 10 : i % 3 === 1 ? 3 : 0,
+      }
+    })
+    setGuesses(fakeGuesses)
+  }, [showDebug, effectiveRound, phaseMatches])
 
   function renderMatchList(list: Match[], interactive: boolean) {
     return (
@@ -93,8 +164,9 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
             key={match.id}
             match={match}
             guess={guesses[match.id]}
-            odds={oddsMap?.[match.id] ?? null}
-            {...(interactive ? { onGuessChange: handleGuessChange, saving: savingMatches[match.id] } : {})}
+
+            blocked={interactive && !user}
+            {...(interactive && user ? { onGuessChange: handleGuessChange, saving: savingMatches[match.id] } : {})}
           />
         ))}
       </div>
@@ -131,15 +203,31 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
 
   return (
     <div className="space-y-4">
-      {rounds.length > 0 && (
+      {hasPhases && (
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          {phases.map((phase) => (
+            <button
+              key={phase}
+              onClick={() => setSelectedPhase(phase)}
+              className={`px-4 py-1.5 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
+                selectedPhase === phase
+                  ? 'bg-green text-white border-green'
+                  : 'bg-white text-gray-400 border-line hover:border-green/30 hover:text-green'
+              }`}
+            >
+              {translatePhase(phase)}
+            </button>
+          ))}
+        </div>
+      )}
+      {showRoundSelector && (
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => {
-              if (!selectedRound) return
-              const idx = rounds.indexOf(selectedRound)
-              if (idx > 0) setSelectedRound(rounds[idx - 1])
+              const idx = displayRounds.indexOf(selectedRound!)
+              if (idx > 0) setSelectedRound(displayRounds[idx - 1])
             }}
-            disabled={!selectedRound || rounds.indexOf(selectedRound) === 0}
+            disabled={displayRounds.indexOf(selectedRound!) === 0}
             className="w-9 h-9 rounded-xl border border-green/30 bg-green-cover-bg flex items-center justify-center text-green hover:bg-green hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -148,24 +236,17 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
           </button>
 
           <div className="bg-green-cover-bg rounded-xl px-6 py-2.5 min-w-[160px] text-center">
-            <button
-              onClick={() => setSelectedRound(null)}
-              className="text-base font-bold text-green hover:text-green/70 transition-colors select-none"
-            >
-              {selectedRound ? `Rodada ${selectedRound}` : 'Todas as rodadas'}
-            </button>
+            <span className="text-base font-bold text-green select-none">
+              Rodada {selectedRound}
+            </span>
           </div>
 
           <button
             onClick={() => {
-              if (selectedRound) {
-                const idx = rounds.indexOf(selectedRound)
-                if (idx < rounds.length - 1) setSelectedRound(rounds[idx + 1])
-              } else {
-                setSelectedRound(rounds[0])
-              }
+              const idx = displayRounds.indexOf(selectedRound!)
+              if (idx < displayRounds.length - 1) setSelectedRound(displayRounds[idx + 1])
             }}
-            disabled={selectedRound !== null && rounds.indexOf(selectedRound) === rounds.length - 1}
+            disabled={displayRounds.indexOf(selectedRound!) === displayRounds.length - 1}
             className="w-9 h-9 rounded-xl border border-green/30 bg-green-cover-bg flex items-center justify-center text-green hover:bg-green hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -174,149 +255,185 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, oddsMap 
           </button>
         </div>
       )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-        <div>
-          {finishedMatches.length > 0 && (
-            <>
-              <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide mb-3 px-1">
-                Finalizados
-              </h2>
-              <div className="space-y-2">
-                {finishedMatches.map((match) => (
-                  <div
-                    key={match.id}
-                    className="bg-white rounded-lg border border-green/30 p-3 flex items-center justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
-                      <span className="text-xs font-semibold text-gray-500 truncate">
-                        {match.homeTeam.name}
-                      </span>
-                      <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {match.homeTeam.logo ? (
-                          <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-4 h-4 object-contain" />
-                        ) : (
-                          <span className="text-[8px] font-bold text-gray-300">H</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <span className="w-8 h-8 rounded-md bg-green-cover-bg flex items-center justify-center text-sm font-bold text-green">
-                        {match.gameScore?.homeGoals ?? 0}
-                      </span>
-                      <span className="text-gray-300 font-bold text-xs">×</span>
-                      <span className="w-8 h-8 rounded-md bg-green-cover-bg flex items-center justify-center text-sm font-bold text-green">
-                        {match.gameScore?.awayGoals ?? 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {match.awayTeam.logo ? (
-                          <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-4 h-4 object-contain" />
-                        ) : (
-                          <span className="text-[8px] font-bold text-gray-300">A</span>
-                        )}
-                      </div>
-                      <span className="text-xs font-semibold text-gray-500 truncate">
-                        {match.awayTeam.name}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {(participantsLoading || participants.length > 0) && (
-            <div className={`bg-white rounded-lg border border-line overflow-hidden ${finishedMatches.length > 0 ? 'mt-4' : ''}`}>
-              <div className="px-4 py-3 border-b border-line">
-                {participantsLoading ? (
-                  <div className="w-28 h-3 rounded bg-gray-200 animate-pulse" />
-                ) : (
-                  <h2 className="font-semibold text-gray-500 text-xs uppercase tracking-wide">
-                    Participantes ({participants.length})
-                  </h2>
-                )}
-              </div>
-              <div className="divide-y divide-line">
-                {participantsLoading
-                  ? [1, 2, 3].map((i) => (
-                      <div key={i} className="px-4 py-2.5 flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-gray-200 animate-pulse" />
-                        <div className="w-28 h-3 rounded bg-gray-200 animate-pulse" />
-                      </div>
-                    ))
-                  : participants.slice(0, 5).map((p) => (
-                      <div key={p.id} className="px-4 py-2.5 flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-green-cover-bg flex items-center justify-center flex-shrink-0">
-                          <span className="text-[11px] font-bold text-green">
-                            {(p.name ?? '?')[0]?.toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-sm font-medium text-table-text truncate">
-                          {p.name ?? 'Anônimo'}
-                        </span>
-                      </div>
-                    ))}
-                {!participantsLoading && participants.length > 5 && (
-                  <div className="px-4 py-2.5 text-center">
-                    <span className="text-xs text-gray-300">
-                      e mais {participants.length - 5}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="lg:sticky lg:top-20 mt-4">
-            <a
-              href="#"
-              className="block rounded-lg overflow-hidden hover:opacity-90 transition-opacity aspect-square"
+      {showDebug && (
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider mr-1">Debug:</span>
+          {(['mixed', 'all-finished', 'all-pending'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setDebugState(s)}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg border transition-colors cursor-pointer ${
+                debugState === s
+                  ? 'bg-green text-white border-green'
+                  : 'bg-white text-gray-400 border-line hover:border-green/30 hover:text-green'
+              }`}
             >
-              <div className="bg-[#1B4D3E] w-full h-full flex flex-col items-center justify-center gap-3 px-4">
-                <span className="text-[#A3D977] text-xs font-bold uppercase tracking-widest text-center">APOSTE COM</span>
-                <span className="text-white text-3xl font-black italic leading-none">bet365</span>
-                <div className="w-10 h-px bg-white/20" />
-                <span className="text-white text-xs font-semibold uppercase tracking-wide text-center">Odds incríveis</span>
-                <span className="bg-[#A3D977] text-[#1B4D3E] text-xs font-bold px-3 py-1 rounded">Cadastre-se já!</span>
-              </div>
-            </a>
-          </div>
+              {s === 'mixed' ? 'Mistos' : s === 'all-finished' ? 'Tudo finalizado' : 'Tudo pendente'}
+            </button>
+          ))}
         </div>
+      )}
 
-        {pendingMatches.length > 0 && (
-          <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide mb-3 px-1">
-              Próximos Jogos
-            </h2>
-            {renderMatchList(pendingMatches.slice(0, Math.ceil(pendingMatches.length / 2)), true)}
+      {(() => {
+        const hasPending = displayPending.length > 0
+        const hasFinished = displayFinished.length > 0
+        const showTwoColumns = hasPending && hasFinished
+        const showAllFinished = !hasPending && hasFinished
+        const showOnlyPending = hasPending && !hasFinished
 
-            {pendingMatches.length > 4 && (
-              <div className="my-6">
-                <a
-                  href="#"
-                  className="block rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
-                >
-                  <div className="bg-[#1B4D3E] h-20 flex items-center justify-center gap-4 px-6">
-                    <div className="flex flex-col items-end">
-                      <span className="text-[#A3D977] text-[10px] font-bold uppercase tracking-widest">APOSTE COM</span>
-                      <span className="text-white text-xl font-black italic -mt-0.5">bet365</span>
-                    </div>
-                    <div className="w-px h-8 bg-white/20" />
-                    <div className="flex flex-col items-start">
-                      <span className="text-white text-xs font-semibold uppercase tracking-wide">Odds incríveis</span>
-                      <span className="text-[#A3D977] text-xs font-bold">Cadastre-se já!</span>
-                    </div>
+        function FinishedCard({ match }: { match: Match }) {
+          const g = guesses[match.id]
+          return (
+            <div className="bg-white rounded-lg border border-green/30 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
+                  <span className="text-xs font-semibold text-gray-500 truncate">{match.homeTeam.name}</span>
+                  <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {match.homeTeam.logo ? (
+                      <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-4 h-4 object-contain" />
+                    ) : (
+                      <span className="text-[8px] font-bold text-gray-300">H</span>
+                    )}
                   </div>
-                </a>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <span className="w-8 h-8 rounded-md bg-green-cover-bg flex items-center justify-center text-sm font-bold text-green">
+                    {match.gameScore?.homeGoals ?? 0}
+                  </span>
+                  <span className="text-gray-300 font-bold text-xs">×</span>
+                  <span className="w-8 h-8 rounded-md bg-green-cover-bg flex items-center justify-center text-sm font-bold text-green">
+                    {match.gameScore?.awayGoals ?? 0}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {match.awayTeam.logo ? (
+                      <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-4 h-4 object-contain" />
+                    ) : (
+                      <span className="text-[8px] font-bold text-gray-300">A</span>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-gray-500 truncate">{match.awayTeam.name}</span>
+                </div>
+              </div>
+              {g?.score !== undefined && (
+                <div className={`mt-2 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg ${
+                  g.score === 10 ? 'bg-green-cover-bg'
+                  : g.score > 0 ? 'bg-amber-50'
+                  : 'bg-red-50'
+                }`}>
+                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wide">Seu palpite</span>
+                  <span className={`text-sm font-bold ${
+                    g.score === 10 ? 'text-green'
+                    : g.score > 0 ? 'text-amber-700'
+                    : 'text-red-widget'
+                  }`}>
+                    {g.homeGoals} x {g.awayGoals}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-sm ${
+                    g.score === 10 ? 'bg-green text-white'
+                    : g.score > 0 ? 'bg-amber-200 text-amber-800'
+                    : 'bg-red-200 text-red-800'
+                  }`}>
+                    {g.score === 10 ? 'Exato +10'
+                    : g.score > 0 ? `+${g.score}`
+                    : '0 pts'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        return (
+          <div className={`grid grid-cols-1 gap-6 ${showTwoColumns ? 'lg:grid-cols-[320px_1fr]' : ''}`}>
+            {/* Left finished column — only when there are still pending matches */}
+            {showTwoColumns && (
+              <div>
+                <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide mb-3 px-1">
+                  Finalizados
+                </h2>
+                <div className="space-y-2">
+                  {displayFinished.map((match) => (
+                    <FinishedCard key={match.id} match={match} />
+                  ))}
+                </div>
+                <div className="lg:sticky lg:top-20 mt-4">
+                  <AdBanner variant="square" />
+                </div>
               </div>
             )}
 
-            {renderMatchList(pendingMatches.slice(Math.ceil(pendingMatches.length / 2)), true)}
+            {/* Main column */}
+            <div className="min-w-0">
+              {showAllFinished && (
+                <>
+                  <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide mb-3 px-1">
+                    Resultados
+                  </h2>
+                  {renderMatchList(displayFinished, false)}
+                </>
+              )}
+
+              {showOnlyPending && (
+                <>
+                  <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide mb-3 px-1">
+                    Próximos Jogos
+                  </h2>
+                  <div className="space-y-3">
+                    {!user && !authLoading && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-5 py-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-amber-600 flex-shrink-0">
+                            <rect x="3" y="11" width="18" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                            <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                          <p className="text-sm text-amber-800">Faça login para fazer seus palpites.</p>
+                        </div>
+                        <a href="/auth" className="flex-shrink-0 px-4 py-1.5 rounded-lg bg-green text-white text-xs font-semibold hover:bg-green-hover transition-colors no-underline">
+                          Entrar
+                        </a>
+                      </div>
+                    )}
+                    {renderMatchList(displayPending, true)}
+                  </div>
+                </>
+              )}
+
+              {showTwoColumns && (
+                <>
+                  <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide mb-3 px-1">
+                    Próximos Jogos
+                  </h2>
+                  <div className="space-y-3">
+                    {!user && !authLoading && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-5 py-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-amber-600 flex-shrink-0">
+                            <rect x="3" y="11" width="18" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                            <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                          <p className="text-sm text-amber-800">Faça login para fazer seus palpites.</p>
+                        </div>
+                        <a href="/auth" className="flex-shrink-0 px-4 py-1.5 rounded-lg bg-green text-white text-xs font-semibold hover:bg-green-hover transition-colors no-underline">
+                          Entrar
+                        </a>
+                      </div>
+                    )}
+                    {renderMatchList(displayPending, true)}
+                  </div>
+                </>
+              )}
+
+              {!showAllFinished && !showOnlyPending && !showTwoColumns && (
+                <div className="bg-white rounded-lg border border-dashed border-gray-200 p-6 text-center">
+                  <p className="text-sm text-gray-300">Nenhum jogo encontrado para {hasPhases ? 'esta fase' : 'esta rodada'}.</p>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+        )
+      })()}
     </div>
   )
 }

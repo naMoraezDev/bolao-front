@@ -6,13 +6,15 @@ import InviteModal from './InviteModal'
 
 interface LeagueInviteButtonProps {
   leagueSlug: string
+  accessRules?: { rule: 'PUBLIC' | 'INVITE_CODE' }[]
 }
 
-export default function LeagueInviteButton({ leagueSlug }: LeagueInviteButtonProps) {
+export default function LeagueInviteButton({ leagueSlug, accessRules }: LeagueInviteButtonProps) {
   const { user } = useAuth()
   const [showInvite, setShowInvite] = useState(false)
 
-  if (!user) return null
+  const rules = accessRules?.map((r) => r.rule) ?? []
+  if (!user || !rules.includes('INVITE_CODE')) return null
 
   return (
     <>

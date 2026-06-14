@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { api } from "@/lib/api"
 import PoolLeagueManager from "@/components/PoolLeagueManager"
+import AdBanner from "@/components/AdBanner"
 import type { PoolDetails } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
@@ -29,7 +30,7 @@ export default async function PoolDetailPage({
           O bolão &quot;{poolSlug}&quot; não existe ou está indisponível.
         </p>
         <Link
-          href="/pools"
+          href="/bolao"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-green text-white text-sm font-semibold rounded-normal hover:bg-green-hover transition-colors no-underline"
         >
           Ver todos os bolões
@@ -43,12 +44,12 @@ export default async function PoolDetailPage({
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
         <Link href="/" className="hover:text-green transition-colors no-underline">
-          Home
+          Início
         </Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <Link href="/pools" className="hover:text-green transition-colors no-underline">
+        <Link href="/bolao" className="hover:text-green transition-colors no-underline">
           Bolões
         </Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -60,21 +61,29 @@ export default async function PoolDetailPage({
       {/* Header */}
       <div className="bg-white rounded-lg border border-line p-6 md:p-8 mb-8">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0">
-            <svg width="28" height="28" viewBox="0 0 20 20" fill="none" className="text-green">
-              <rect x="2" y="2" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
+          <div className="w-16 h-16 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {pool.icon ? (
+              <img src={pool.icon} alt={pool.name} className="w-full h-full object-cover" />
+            ) : (
+              <svg width="32" height="32" viewBox="0 0 20 20" fill="none" className="text-green">
+                <rect x="2" y="2" width="16" height="16" rx="4" stroke="currentColor" strokeWidth="1.5" />
+                <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            )}
           </div>
           <div className="flex-1">
             <h1 className="font-display text-2xl md:text-3xl font-bold text-black-lance mb-1">
               {pool.name}
             </h1>
             <p className="text-sm text-gray-300">
-              slug: /{pool.slug}
+              Participe e faça seus palpites
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="mb-8">
+        <AdBanner variant="horizontal" />
       </div>
 
       {/* Leagues Section */}
