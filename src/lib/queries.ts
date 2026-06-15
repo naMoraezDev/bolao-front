@@ -123,10 +123,10 @@ export function useGuessesList(poolSlug: string, leagueSlug: string, enabled = t
   })
 }
 
-export function useLeaderboardRanking(poolSlug: string, leagueSlug: string) {
+export function useLeaderboardRanking(poolSlug: string, leagueSlug: string, params?: { limit?: number; cursor?: string }) {
   return useQuery({
-    queryKey: queryKeys.leaderboard.ranking(poolSlug, leagueSlug),
-    queryFn: () => api.leaderboard.getRanking(poolSlug, leagueSlug),
+    queryKey: [...queryKeys.leaderboard.ranking(poolSlug, leagueSlug), params?.limit, params?.cursor],
+    queryFn: () => api.leaderboard.getRanking(poolSlug, leagueSlug, params),
     enabled: !!poolSlug && !!leagueSlug,
   })
 }

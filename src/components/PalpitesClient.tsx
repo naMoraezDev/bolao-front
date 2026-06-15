@@ -235,7 +235,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
             </svg>
           </button>
 
-          <div className="bg-green-cover-bg rounded-xl px-6 py-2.5 min-w-[160px] text-center">
+          <div className="bg-green-cover-bg rounded-xl px-4 sm:px-6 py-2.5 min-w-[120px] sm:min-w-[160px] text-center">
             <span className="text-base font-bold text-green select-none">
               Rodada {selectedRound}
             </span>
@@ -346,7 +346,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
         }
 
         return (
-          <div className={`grid grid-cols-1 gap-6 ${showTwoColumns ? 'lg:grid-cols-[320px_1fr]' : ''}`}>
+          <div className={`grid grid-cols-1 gap-6 ${showTwoColumns ? 'md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr]' : ''}`}>
             {/* Left finished column — only when there are still pending matches */}
             {showTwoColumns && (
               <div>

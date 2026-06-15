@@ -3,8 +3,10 @@ import { api } from "@/lib/api"
 import Tabs from "@/components/Tabs"
 import ParticipantsList from "@/components/ParticipantsList"
 import LeagueInviteButton from "@/components/LeagueInviteButton"
+import DeleteLeagueButton from "@/components/DeleteLeagueButton"
 import LeagueBadge from "@/components/LeagueBadge"
 import LeagueCreatorBadge from "@/components/LeagueCreatorBadge"
+import PoolStatusBadge from "@/components/PoolStatusBadge"
 import AdBanner from "@/components/AdBanner"
 import type { League } from "@/lib/types"
 
@@ -71,7 +73,7 @@ export default async function DetalhesPage({
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
+      <nav className="flex items-center gap-2 text-[13px] sm:text-sm text-gray-300 mb-6 overflow-x-auto whitespace-nowrap">
         <Link href="/" className="hover:text-green transition-colors no-underline">Início</Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -84,15 +86,15 @@ export default async function DetalhesPage({
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <span className="text-gray-500 font-medium">{league.name}</span>
+        <span className="text-gray-500 font-medium truncate max-w-[120px] sm:max-w-none">{league.name}</span>
       </nav>
 
       {/* League Header */}
       <div className="bg-white rounded-lg border border-line p-6 md:p-8 mb-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {league.pool?.icon ? (
-              <img src={league.pool.icon} alt="" className="w-full h-full object-cover" />
+            {league.pool?.cover ? (
+              <img src={league.pool.cover} alt="" className="w-full h-full object-cover" />
             ) : (
               <svg width="32" height="32" viewBox="0 0 20 20" fill="none" className="text-green">
                 <path d="M10 2L12.5 7L18 7.6L14 11.4L15 17L10 14.5L5 17L6 11.4L2 7.6L7.5 7L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -103,13 +105,19 @@ export default async function DetalhesPage({
             <p className="text-xs text-gray-300 mb-0.5">
               {league.pool?.name ?? poolSlug}
             </p>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-black-lance truncate">{league.name}</h1>
-                <LeagueCreatorBadge creatorId={league.creatorId} />
-                <LeagueBadge accessRules={league.accessRules} />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
+                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-black-lance">{league.name}</h1>
+                <div className="flex items-center gap-2">
+                  <LeagueCreatorBadge creatorId={league.creatorId} />
+                  <LeagueBadge accessRules={league.accessRules} />
+                  {league.pool?.status && <PoolStatusBadge status={league.pool.status} />}
+                </div>
               </div>
-              <LeagueInviteButton leagueSlug={leagueSlug} accessRules={league.accessRules} />
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <DeleteLeagueButton poolSlug={poolSlug} leagueSlug={leagueSlug} creatorId={league.creatorId} />
+                <LeagueInviteButton leagueSlug={leagueSlug} accessRules={league.accessRules} />
+              </div>
             </div>
           </div>
         </div>

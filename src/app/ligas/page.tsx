@@ -2,6 +2,8 @@ import Link from "next/link"
 import { api } from "@/lib/api"
 import type { League } from "@/lib/types"
 import JoinLeagueButton from "@/components/JoinLeagueButton"
+import PoolStatusBadge from "@/components/PoolStatusBadge"
+import LeagueBadge from "@/components/LeagueBadge"
 import AdBanner from "@/components/AdBanner"
 
 export const dynamic = "force-dynamic"
@@ -56,9 +58,13 @@ export default async function PublicLeaguesPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-500 group-hover:text-green transition-colors">
-                        {league.name}
-                      </h3>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-semibold text-gray-500 group-hover:text-green transition-colors">
+                          {league.name}
+                        </h3>
+                        {firstPool?.status && <PoolStatusBadge status={firstPool.status} />}
+                        <LeagueBadge accessRules={league.accessRules} />
+                      </div>
                       {firstPool && (
                         <span className="text-xs text-gray-300">
                           {firstPool.name}

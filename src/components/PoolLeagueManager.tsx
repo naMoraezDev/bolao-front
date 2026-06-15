@@ -9,14 +9,17 @@ import CreateLeagueModal from './CreateLeagueModal'
 import JoinLeagueModal from './JoinLeagueModal'
 import type { UserLeague, League } from '@/lib/types'
 import LeagueBadge from './LeagueBadge'
+import PoolStatusBadge from './PoolStatusBadge'
+import type { PoolStatus } from '@/lib/types'
 
 interface PoolLeagueManagerProps {
   poolSlug: string
   poolName: string
+  poolStatus: PoolStatus
   defaultLeague?: League | null
 }
 
-export default function PoolLeagueManager({ poolSlug, poolName, defaultLeague }: PoolLeagueManagerProps) {
+export default function PoolLeagueManager({ poolSlug, poolName, poolStatus, defaultLeague }: PoolLeagueManagerProps) {
   const { user } = useAuth()
   const { data: leaguesData, isLoading: loading, refetch } = useUserLeagues()
   const [showCreate, setShowCreate] = useState(false)
@@ -97,15 +100,18 @@ export default function PoolLeagueManager({ poolSlug, poolName, defaultLeague }:
                       <path d="M10 2L12.5 7L18 7.6L14 11.4L15 17L10 14.5L5 17L6 11.4L2 7.6L7.5 7L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                     </svg>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-500 group-hover:text-green transition-colors">
-                      {league.name}
-                    </h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-xs text-gray-300">{poolName}</span>
-                      <LeagueBadge accessRules={'accessRules' in league ? league.accessRules : undefined} />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-semibold text-gray-500 group-hover:text-green transition-colors">
+                          {league.name}
+                        </h3>
+                        <PoolStatusBadge status={poolStatus} />
+                        <LeagueBadge accessRules={'accessRules' in league ? league.accessRules : undefined} />
+                      </div>
+                      <div className="mt-0.5">
+                        <span className="text-xs text-gray-300">{poolName}</span>
+                      </div>
                     </div>
-                  </div>
                 </div>
                 <div className="flex items-center gap-1 text-gray-300 group-hover:text-green transition-colors">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

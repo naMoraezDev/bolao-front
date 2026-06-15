@@ -13,7 +13,8 @@ const navLinks = [
 ]
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function Header() {
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
+        setUserMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -34,9 +35,9 @@ export default function Header() {
       <div className="max-w-[1340px] mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center no-underline">
           <img
-            src="https://lncimg.lance.com.br/cdn-cgi/image/width=93,height=24,quality=75,fit=pad,format=webp,background=transparent/assets/lance-global/v1/logo-lance.svg"
+            src="https://lncimg.lance.com.br/cdn-cgi/image/width=168,height=64,quality=75,fit=pad,format=webp,background=transparent/uploads/2026/06/Logo_Lance-Copa-do-Mundo.png"
             alt="Lance!"
-            className="h-6 w-auto object-contain"
+            className="h-8 w-auto object-contain"
           />
         </Link>
 
@@ -67,7 +68,7 @@ export default function Header() {
           ) : user ? (
             <div className="relative" ref={menuRef}>
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="w-8 h-8 rounded-full bg-green-cover-bg flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green/10 hover:ring-green/30 transition-all cursor-pointer border-none"
               >
                 {user.photoURL ? (
@@ -80,7 +81,7 @@ export default function Header() {
               </button>
 
               <AnimatePresence>
-                {menuOpen && (
+                {userMenuOpen && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: -4 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -97,7 +98,7 @@ export default function Header() {
                       </p>
                     </div>
                     <button
-                      onClick={() => { signOut(); setMenuOpen(false) }}
+                      onClick={() => { signOut(); setUserMenuOpen(false) }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-widget hover:bg-red-50 transition-colors cursor-pointer border-none"
                     >
                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -117,13 +118,57 @@ export default function Header() {
               Entrar
             </button>
           )}
-          <button className="inline-flex items-center justify-center w-10 h-10 rounded-normal text-gray-500 hover:bg-gray-200 transition-colors md:hidden cursor-pointer border-none">
+          <button
+            onClick={() => { setMobileNavOpen(!mobileNavOpen); setUserMenuOpen(false) }}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-normal text-gray-500 hover:bg-gray-200 transition-colors md:hidden cursor-pointer border-none"
+          >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M2.5 5H17.5M2.5 10H17.5M2.5 15H17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.15 }}
+            className="border-t border-line overflow-hidden md:hidden"
+          >
+            <div className="max-w-[1340px] mx-auto px-4 py-3 flex flex-col gap-1">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileNavOpen(false)}
+                    className={`px-4 py-2.5 rounded-normal text-sm font-medium transition-colors no-underline ${
+                      isActive
+                        ? 'bg-green-cover-bg text-green'
+                        : 'text-gray-500 hover:bg-gray-200 hover:text-gray-600'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+              {!user && !loading && (
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileNavOpen(false)}
+                  className="px-4 py-2.5 rounded-normal text-sm font-medium text-green bg-green-cover-bg hover:bg-green hover:text-white transition-colors no-underline mt-1"
+                >
+                  Entrar
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

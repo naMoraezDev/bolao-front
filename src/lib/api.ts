@@ -65,6 +65,11 @@ export const api = {
         `/pools/${poolSlug}/leagues/${leagueSlug}/participants/${userId}`,
         { method: 'DELETE' }
       ),
+    delete: (poolSlug: string, leagueSlug: string) =>
+      fetchApi<{ deleted: boolean }>(
+        `/pools/${poolSlug}/leagues/${leagueSlug}`,
+        { method: 'DELETE' }
+      ),
   },
 
   user: {
@@ -95,10 +100,15 @@ export const api = {
   },
 
   leaderboard: {
-    getRanking: (poolSlug: string, leagueSlug: string, params?: { key?: string; type?: string }) => {
-      const query = new URLSearchParams(params as Record<string, string>).toString()
+    getRanking: (poolSlug: string, leagueSlug: string, params?: { key?: string; type?: string; limit?: number; cursor?: string }) => {
+      const query = new URLSearchParams()
+      if (params?.key) query.set('key', params.key)
+      if (params?.type) query.set('type', params.type)
+      if (params?.limit) query.set('limit', String(params.limit))
+      if (params?.cursor) query.set('cursor', params.cursor)
+      const qs = query.toString()
       return fetchApi<{ items: LeaderboardEntry[]; nextCursor?: string }>(
-        `/pools/${poolSlug}/leagues/${leagueSlug}/leaderboard${query ? `?${query}` : ''}`
+        `/pools/${poolSlug}/leagues/${leagueSlug}/leaderboard${qs ? `?${qs}` : ''}`
       )
     },
     getUserEntries: (poolSlug: string, leagueSlug: string, encrypted: string) =>

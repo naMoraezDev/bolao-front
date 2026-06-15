@@ -48,7 +48,7 @@ export default function EstatisticasPage({
   if (!isSharedView && !user) {
     return (
       <div className="max-w-[1340px] mx-auto px-4 py-16">
-        <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
+        <nav className="flex items-center gap-2 text-[13px] sm:text-sm text-gray-300 mb-6 overflow-x-auto whitespace-nowrap">
           <Link href="/" className="hover:text-green transition-colors no-underline">Início</Link>
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -59,7 +59,7 @@ export default function EstatisticasPage({
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span className="text-gray-500">{league?.pool?.name ?? poolSlug}</span>
+              <span className="text-gray-500 truncate max-w-[120px] sm:max-w-none">{league?.pool?.name ?? poolSlug}</span>
             </>
           )}
           {leagueSlug && (
@@ -95,7 +95,7 @@ export default function EstatisticasPage({
 
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-8">
-      <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
+      <nav className="flex items-center gap-2 text-[13px] sm:text-sm text-gray-300 mb-6 overflow-x-auto whitespace-nowrap">
         <Link href="/" className="hover:text-green transition-colors no-underline">Início</Link>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -106,7 +106,7 @@ export default function EstatisticasPage({
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className="text-gray-500">{league?.pool?.name ?? poolSlug}</span>
+            <span className="text-gray-500 truncate max-w-[120px] sm:max-w-none">{league?.pool?.name ?? poolSlug}</span>
           </>
         )}
         {leagueSlug && (
@@ -186,15 +186,15 @@ export default function EstatisticasPage({
                   </div>
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {league?.pool?.icon ? (
-                        <img src={league.pool.icon} alt="" className="w-full h-full object-cover" />
+                      {league?.pool?.cover ? (
+                        <img src={league.pool.cover} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <svg width="32" height="32" viewBox="0 0 20 20" fill="none" className="text-white/80">
                           <path d="M10 2L12.5 7L18 7.6L14 11.4L15 17L10 14.5L5 17L6 11.4L2 7.6L7.5 7L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                         </svg>
                       )}
                     </div>
-                    <div className="min-w-0">
+                    <div className="hidden sm:block min-w-0">
                       <p className="text-sm text-white/60 truncate">
                         {league?.pool?.name ?? poolSlug}
                       </p>

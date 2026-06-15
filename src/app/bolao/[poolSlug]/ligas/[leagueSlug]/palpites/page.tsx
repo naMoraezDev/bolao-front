@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { api } from "@/lib/api"
 import Tabs from "@/components/Tabs"
+import PoolStatusBadge from "@/components/PoolStatusBadge"
+import LeagueBadge from "@/components/LeagueBadge"
 import AdBanner from "@/components/AdBanner"
 import PalpitesClient from "@/components/PalpitesClient"
 import type { Match, League } from "@/lib/types"
@@ -59,7 +61,7 @@ export default async function PalpitesPage({
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-10">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
+      <nav className="flex items-center gap-2 text-[13px] sm:text-sm text-gray-300 mb-6 overflow-x-auto whitespace-nowrap">
         <Link href="/" className="hover:text-green transition-colors no-underline">
           Início
         </Link>
@@ -78,28 +80,34 @@ export default async function PalpitesPage({
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <path d="M4.5 9L7.5 6L4.5 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <span className="text-gray-500 font-medium">{league?.name ?? leagueSlug}</span>
+        <span className="text-gray-500 font-medium truncate max-w-[120px] sm:max-w-none">{league?.name ?? leagueSlug}</span>
       </nav>
 
       {/* League Header */}
       <div className="bg-white rounded-lg border border-line p-6 mb-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {league?.pool?.icon ? (
-              <img src={league.pool.icon} alt="" className="w-full h-full object-cover" />
+            {league?.pool?.cover ? (
+              <img src={league.pool.cover} alt="" className="w-full h-full object-cover" />
             ) : (
               <svg width="32" height="32" viewBox="0 0 20 20" fill="none" className="text-green">
                 <path d="M10 2L12.5 7L18 7.6L14 11.4L15 17L10 14.5L5 17L6 11.4L2 7.6L7.5 7L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
               </svg>
             )}
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <p className="text-xs text-gray-300 mb-0.5">
               {league?.pool?.name ?? poolSlug}
             </p>
-            <h1 className="font-display text-2xl font-bold text-black-lance mb-1">
-              {league?.name ?? leagueSlug}
-            </h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+              <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-black-lance">
+                {league?.name ?? leagueSlug}
+              </h1>
+              <div className="flex items-center gap-2">
+                <LeagueBadge accessRules={league?.accessRules} />
+                {league?.pool?.status && <PoolStatusBadge status={league.pool.status} />}
+              </div>
+            </div>
             <p className="text-sm text-gray-300">
               {matches.length} jogos · {pendingMatches.length} pendentes · {finishedMatches.length} finalizados
             </p>

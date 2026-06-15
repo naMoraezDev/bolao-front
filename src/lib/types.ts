@@ -1,8 +1,11 @@
+export type PoolStatus = 'upcoming' | 'ongoing' | 'finished'
+
 export interface Pool {
   id: string
   name: string
   slug: string
-  icon?: string
+  cover?: string
+  status: PoolStatus
 }
 
 export interface PoolDetails extends Pool {
@@ -21,8 +24,8 @@ export interface League {
   template?: Record<string, unknown>
   info?: Record<string, unknown>
   faq?: Record<string, unknown>
-  pool?: { id: string; name: string; slug: string; icon?: string }
-  pools?: { pool: { id: string; name: string; slug: string; icon?: string } }[]
+  pool?: { id: string; name: string; slug: string; cover?: string; status?: PoolStatus }
+  pools?: { pool: { id: string; name: string; slug: string; cover?: string; status?: PoolStatus; championshipId?: string } }[]
   accessRules?: { rule: 'PUBLIC' | 'INVITE_CODE' }[]
 }
 

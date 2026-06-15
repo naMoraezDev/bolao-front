@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
-import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface AdBannerProps {
   variant?: 'horizontal' | 'square'
@@ -46,23 +45,16 @@ const bookmakers = [
   },
 ]
 
-function hashPath(path: string): number {
-  let hash = 0
-  for (let i = 0; i < path.length; i++) {
-    hash = ((hash << 5) - hash + path.charCodeAt(i)) | 0
-  }
-  return Math.abs(hash)
-}
-
 export default function AdBanner({ variant = 'horizontal' }: AdBannerProps) {
-  const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+  const [bookmakerIdx, setBookmakerIdx] = useState(0)
 
-  const bookmaker = useMemo(() => {
-    const idx = hashPath(pathname) % bookmakers.length
-    return bookmakers[idx]
-  }, [pathname])
+  useEffect(() => {
+    setBookmakerIdx(Math.floor(Math.random() * bookmakers.length))
+    setMounted(true)
+  }, [])
 
-  const { bg, accent, name, slogan } = bookmaker
+  const { bg, accent, name, slogan } = bookmakers[bookmakerIdx]
 
   if (variant === 'square') {
     return (
@@ -102,23 +94,23 @@ export default function AdBanner({ variant = 'horizontal' }: AdBannerProps) {
       className="block rounded-lg overflow-hidden hover:opacity-90 transition-opacity"
     >
       <div
-        className="h-20 flex items-center justify-center gap-4 px-6"
+        className="min-h-[72px] sm:h-20 flex items-center justify-center gap-2 sm:gap-4 px-4 sm:px-6"
         style={{ backgroundColor: bg }}
       >
         <div className="flex flex-col items-end">
           <span
-            className="text-[10px] font-bold uppercase tracking-widest"
+            className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest"
             style={{ color: accent }}
           >
             APOSTE COM
           </span>
-          <span className="text-white text-xl font-black italic -mt-0.5">{name}</span>
+          <span className="text-white text-base sm:text-xl font-black italic -mt-0.5">{name}</span>
         </div>
-        <div className="w-px h-8 bg-white/20" />
+        <div className="w-px h-6 sm:h-8 bg-white/20" />
         <div className="flex flex-col items-start">
-          <span className="text-white text-xs font-semibold uppercase tracking-wide">{slogan}</span>
+          <span className="text-white text-[10px] sm:text-xs font-semibold uppercase tracking-wide">{slogan}</span>
           <span
-            className="text-xs font-bold"
+            className="text-[10px] sm:text-xs font-bold"
             style={{ color: accent }}
           >
             Cadastre-se já!

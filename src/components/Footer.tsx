@@ -5,9 +5,9 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">
             <img
-              src="https://lncimg.lance.com.br/cdn-cgi/image/width=93,height=24,quality=75,fit=pad,format=webp,background=transparent/assets/lance-global/v1/logo-lance.svg"
+              src="https://lncimg.lance.com.br/cdn-cgi/image/width=168,height=64,quality=75,fit=pad,format=webp,background=transparent/uploads/2026/06/Logo_Lance-Copa-do-Mundo.png"
               alt="Lance!"
-              className="h-6 w-auto object-contain"
+              className="h-8 w-auto object-contain"
             />
           </div>
 

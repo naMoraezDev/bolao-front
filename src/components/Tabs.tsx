@@ -13,7 +13,8 @@ export default function Tabs({ tabs }: { tabs: Tab[] }) {
   const pathname = usePathname()
 
   return (
-    <div className="flex gap-1 p-1 bg-gray-200 rounded-lg w-fit">
+    <div className="overflow-x-auto">
+      <div className="flex gap-1 p-1 bg-gray-200 rounded-lg w-fit">
       {tabs.map((tab) => {
         const isActive = pathname === tab.href
         return (
@@ -30,6 +31,7 @@ export default function Tabs({ tabs }: { tabs: Tab[] }) {
           </Link>
         )
       })}
+      </div>
     </div>
   )
 }

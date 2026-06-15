@@ -26,7 +26,7 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
 
   const isTbd = !match.homeTeam?.name?.trim() || !match.awayTeam?.name?.trim()
 
-  const { isFinished, isLive, isLocked, isPreMatchLocked, isUnscheduled } = useMemo(() => {
+  const { isFinished, isLive, isLocked, isPreMatchLocked, isUnscheduled, isOpen } = useMemo(() => {
     if (isInvalidDate) {
       return { isFinished: false, isLive: false, isLocked: true, isPreMatchLocked: false, isUnscheduled: true }
     }
@@ -43,6 +43,7 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
       isLocked: match.locked || match.finished || isPastCutoff,
       isPreMatchLocked: !match.locked && !match.finished && startsIn > 0 && startsIn <= HOUR_MS,
       isUnscheduled: false,
+      isOpen: !match.finished && !match.locked && !isPastCutoff,
     }
   }, [match.finished, match.locked, matchDate, isInvalidDate, isTbd])
 
@@ -73,7 +74,7 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
                 <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.2" />
                 <path d="M6 3.5V6.5M6 7.5V8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
-              Times TBD
+              A definir
             </span>
           )}
           {isUnscheduled && (
@@ -95,6 +96,14 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
               FECHADO
             </span>
           )}
+          {isOpen && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green bg-green-50 px-2 py-0.5 rounded-sm uppercase">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M2 9.5L3.5 8L4.5 9L3 10.5L2 9.5ZM6.5 5.5L5 7L9 11L10.5 9.5L6.5 5.5ZM4.5 4L2 1.5L1.5 2L3 5L4.5 4ZM7.5 3L6 1.5L10.5 1L11 5.5L9.5 4L8.5 5L7 3.5L8.5 2L7.5 3Z" fill="currentColor" />
+              </svg>
+              Palpitar
+            </span>
+          )}
           {isFinished && (
             <span className="text-[10px] font-semibold text-green bg-green-cover-bg px-2 py-0.5 rounded-sm uppercase">
               Finalizado
@@ -109,30 +118,30 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {isTbd ? (
-              <span className="text-sm font-bold text-gray-300">?</span>
+              <span className="text-xs sm:text-sm font-bold text-gray-300">?</span>
             ) : match.homeTeam.logo ? (
-              <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-6 h-6 object-contain" />
+              <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
             ) : (
-              <span className="text-[10px] font-bold text-gray-300">H</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-gray-300">H</span>
             )}
           </div>
-          <span className={`text-sm font-semibold truncate ${isTbd ? 'text-gray-300 italic' : 'text-gray-500'}`}>
+          <span className={`text-[11px] sm:text-sm font-semibold truncate ${isTbd ? 'text-gray-300 italic' : 'text-gray-500'}`}>
             {isTbd ? 'A definir' : match.homeTeam.name}
           </span>
         </div>
 
         {isFinished ? (
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-2">
-              <span className="w-12 h-12 rounded-lg bg-green-cover-bg flex items-center justify-center text-lg font-bold text-green">
+          <div className="flex flex-col items-center gap-1 sm:gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-cover-bg flex items-center justify-center text-base sm:text-lg font-bold text-green">
                 {match.gameScore?.homeGoals ?? 0}
               </span>
-              <span className="text-gray-300 font-bold text-base">×</span>
-              <span className="w-12 h-12 rounded-lg bg-green-cover-bg flex items-center justify-center text-lg font-bold text-green">
+              <span className="text-gray-300 font-bold text-sm sm:text-base">×</span>
+              <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-cover-bg flex items-center justify-center text-base sm:text-lg font-bold text-green">
                 {match.gameScore?.awayGoals ?? 0}
               </span>
             </div>
@@ -192,9 +201,9 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
               }
               disabled={isLocked || blocked}
               placeholder="?"
-              className="w-12 h-12 rounded-lg border border-line text-center text-base font-bold text-gray-700 outline-none disabled:opacity-40 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-line text-center text-sm sm:text-base font-bold text-gray-700 outline-none disabled:opacity-40 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
-            <span className="text-gray-300 font-bold text-base">×</span>
+            <span className="text-gray-300 font-bold text-sm sm:text-base">×</span>
             <input
               type="number"
               min={0}
@@ -205,25 +214,25 @@ export default function MatchCard({ match, guess, onGuessChange, saving, blocked
               }
               disabled={isLocked || blocked}
               placeholder="?"
-              className="w-12 h-12 rounded-lg border border-line text-center text-base font-bold text-gray-700 outline-none disabled:opacity-40 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg border border-line text-center text-sm sm:text-base font-bold text-gray-700 outline-none disabled:opacity-40 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
             {saving && (
-              <span className="w-2 h-2 rounded-full bg-green animate-pulse flex-shrink-0 ml-1" />
+              <span className="w-2 h-2 rounded-full bg-green animate-pulse flex-shrink-0" />
             )}
           </div>
         )}
 
-        <div className="flex items-center gap-2 min-w-0 justify-end">
-          <span className={`text-sm font-semibold truncate ${isTbd ? 'text-gray-300 italic' : 'text-gray-500'}`}>
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 justify-end">
+          <span className={`text-[11px] sm:text-sm font-semibold truncate ${isTbd ? 'text-gray-300 italic' : 'text-gray-500'}`}>
             {isTbd ? 'A definir' : match.awayTeam.name}
           </span>
-          <div className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {isTbd ? (
-              <span className="text-sm font-bold text-gray-300">?</span>
+              <span className="text-xs sm:text-sm font-bold text-gray-300">?</span>
             ) : match.awayTeam.logo ? (
-              <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-6 h-6 object-contain" />
+              <img src={match.awayTeam.logo} alt={match.awayTeam.name} className="w-5 h-5 sm:w-6 sm:h-6 object-contain" />
             ) : (
-              <span className="text-[10px] font-bold text-gray-300">A</span>
+              <span className="text-[9px] sm:text-[10px] font-bold text-gray-300">A</span>
             )}
           </div>
         </div>
