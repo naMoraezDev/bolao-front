@@ -287,7 +287,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
             <div className="bg-white rounded-lg border border-green/30 p-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
-                  <span className="text-xs font-semibold text-gray-500 truncate">{match.homeTeam.name}</span>
+                  <span className="text-xs font-semibold text-gray-500 truncate">{match.homeTeam.initials || match.homeTeam.name}</span>
                   <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {match.homeTeam.logo ? (
                       <img src={match.homeTeam.logo} alt={match.homeTeam.name} className="w-4 h-4 object-contain" />
@@ -313,7 +313,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                       <span className="text-[8px] font-bold text-gray-300">A</span>
                     )}
                   </div>
-                  <span className="text-xs font-semibold text-gray-500 truncate">{match.awayTeam.name}</span>
+                  <span className="text-xs font-semibold text-gray-500 truncate">{match.awayTeam.initials || match.awayTeam.name}</span>
                 </div>
               </div>
               {g?.score !== undefined && (

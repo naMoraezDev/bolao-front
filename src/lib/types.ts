@@ -40,12 +40,17 @@ export interface Match {
   homeTeam: Team
   awayTeam: Team
   gameScore?: GameScore
+  odds?: {
+    home: number | null
+    draw: number | null
+    away: number | null
+  }
 }
 
 export interface Team {
   id: string
   name: string
-  shortName?: string
+  initials?: string
   logo?: string
 }
 

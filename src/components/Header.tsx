@@ -72,7 +72,7 @@ export default function Header() {
                 className="w-8 h-8 rounded-full bg-green-cover-bg flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-green/10 hover:ring-green/30 transition-all cursor-pointer border-none"
               >
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
+                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : (
                   <span className="text-xs font-bold text-green">
                     {(user.displayName ?? user.email ?? '?')[0].toUpperCase()}

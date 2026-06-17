@@ -69,7 +69,7 @@ export default function RankingSection({
 
   if (isLoading && entries.length === 0) {
     return (
-      <div className="rounded-lg border border-line overflow-hidden">
+      <div className="rounded-lg border border-line overflow-hidden bg-white">
         <div className="bg-table-bg-gray border-b border-line px-4 py-3 flex items-center gap-4">
           <div className="w-6 h-4 bg-gray-200 rounded animate-pulse" />
           <div className="flex-1 h-4 bg-gray-200 rounded animate-pulse" />

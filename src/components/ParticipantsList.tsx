@@ -92,6 +92,7 @@ export default function ParticipantsList({
                 <img
                   src={p.avatarUrl}
                   alt=""
+                  referrerPolicy="no-referrer"
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (

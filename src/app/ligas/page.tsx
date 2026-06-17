@@ -62,13 +62,15 @@ export default async function PublicLeaguesPage() {
                         <h3 className="font-semibold text-gray-500 group-hover:text-green transition-colors">
                           {league.name}
                         </h3>
-                        {firstPool?.status && <PoolStatusBadge status={firstPool.status} />}
                         <LeagueBadge accessRules={league.accessRules} />
                       </div>
                       {firstPool && (
-                        <span className="text-xs text-gray-300">
-                          {firstPool.name}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-300">
+                            {firstPool.name}
+                          </span>
+                          {firstPool.status && <PoolStatusBadge status={firstPool.status} />}
+                        </div>
                       )}
                     </div>
                   </div>

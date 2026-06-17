@@ -62,7 +62,7 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
   }
 
   return (
-    <div className="rounded-lg border border-line">
+    <div className="rounded-lg border border-line bg-white">
       <table className="w-full">
         <thead>
           <tr className="bg-table-bg-gray border-b border-line">
@@ -94,7 +94,7 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
                       </div>
                       <div className="flex-1 flex items-center gap-2 min-w-0 px-4">
                         {entry.avatarUrl ? (
-                          <img src={entry.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                          <img src={entry.avatarUrl} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
                         ) : (
                           <div className="w-7 h-7 rounded-full bg-green-cover-bg flex items-center justify-center flex-shrink-0">
                             <span className="text-[10px] font-bold text-green">{(entry.name ?? '?')[0]?.toUpperCase()}</span>
@@ -148,12 +148,12 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
                                 </td>
                                 <td className="px-3 sm:px-4 py-2 sm:py-2.5">
                                   <div className="flex items-center gap-1 sm:gap-1.5">
-                                    <span className="text-[11px] sm:text-xs font-medium text-table-text truncate max-w-[60px] sm:max-w-none">{d.match?.homeTeam.name ?? '—'}</span>
+                                    <span className="text-[11px] sm:text-xs font-medium text-table-text truncate max-w-[60px] sm:max-w-none">{d.match?.homeTeam.initials ?? d.match?.homeTeam.name ?? '—'}</span>
                                     {d.match?.homeTeam.logo ? (
                                       <img src={d.match.homeTeam.logo} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                                     ) : (
                                       <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                        <span className="text-[7px] font-bold text-gray-400">{(d.match?.homeTeam.name ?? '?')[0]}</span>
+                                        <span className="text-[7px] font-bold text-gray-400">{(d.match?.homeTeam.initials ?? d.match?.homeTeam.name ?? '?')[0]}</span>
                                       </div>
                                     )}
                                     <span className="text-[9px] sm:text-[10px] font-bold text-gray-300 flex-shrink-0 mx-0.5">vs</span>
@@ -161,10 +161,10 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
                                       <img src={d.match.awayTeam.logo} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                                     ) : (
                                       <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                                        <span className="text-[7px] font-bold text-gray-400">{(d.match?.awayTeam.name ?? '?')[0]}</span>
+                                        <span className="text-[7px] font-bold text-gray-400">{(d.match?.awayTeam.initials ?? d.match?.awayTeam.name ?? '?')[0]}</span>
                                       </div>
                                     )}
-                                    <span className="text-[11px] sm:text-xs font-medium text-table-text truncate max-w-[60px] sm:max-w-none">{d.match?.awayTeam.name ?? '—'}</span>
+                                    <span className="text-[11px] sm:text-xs font-medium text-table-text truncate max-w-[60px] sm:max-w-none">{d.match?.awayTeam.initials ?? d.match?.awayTeam.name ?? '—'}</span>
                                   </div>
                                 </td>
                                 <td className="px-3 sm:px-4 py-2 sm:py-2.5 text-center">
