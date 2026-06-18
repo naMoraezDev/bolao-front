@@ -5,9 +5,38 @@ import PoolStatusBadge from "@/components/PoolStatusBadge"
 import LeagueBadge from "@/components/LeagueBadge"
 import AdBanner from "@/components/AdBanner"
 import PalpitesClient from "@/components/PalpitesClient"
-import type { Match, League } from "@/lib/types"
+import type { Match, League, NewsItem, LanceNewsResponse } from "@/lib/types"
 
 export const dynamic = "force-dynamic"
+
+const LANCE_API = "https://api.lance.com.br/cms/post/category/recent"
+const LANCE_TOKEN = "0084a918-1a67-4bf0-9062-3eec9ec521cd"
+
+async function fetchLanceNews(category: string): Promise<NewsItem[]> {
+  try {
+    const url = `${LANCE_API}/${category}?limit=6`
+    const res = await fetch(url, {
+      headers: {
+        "x-access-token": LANCE_TOKEN,
+        Origin: "https://www.lance.com.br",
+      },
+      cache: "no-store",
+    })
+    if (!res.ok) throw new Error(`Lance API returned ${res.status}`)
+    const json: LanceNewsResponse = await res.json()
+    return json.data.itens.map((item) => ({
+      id: item.id,
+      title: item.title,
+      summary: item.extraFields.subtitle ?? "",
+      source: item.category.name,
+      url: item.uri,
+      publishedAt: item.date,
+      imageUrl: item.extraFields.image?.sourceUrl,
+    }))
+  } catch {
+    return []
+  }
+}
 
 export default async function PalpitesPage({
   params,
@@ -21,6 +50,7 @@ export default async function PalpitesPage({
   let currentRound: string | undefined
   let phases: string[] = []
   let currentPhase: string | undefined
+  let news: NewsItem[] = []
   try {
     league = await api.leagues.getByPoolAndSlug(poolSlug, leagueSlug)
     const matchesData = await api.pools.getMatches(poolSlug)
@@ -30,6 +60,15 @@ export default async function PalpitesPage({
     currentPhase = matchesData.currentPhase
   } catch {
     // API unavailable
+  }
+
+  const newsCategory = league?.pool?.newsCategory
+  if (newsCategory) {
+    try {
+      news = await fetchLanceNews(newsCategory)
+    } catch {
+      // News unavailable
+    }
   }
 
   const tabs = [
@@ -126,7 +165,7 @@ export default async function PalpitesPage({
       </div>
 
       {/* Matches */}
-      <PalpitesClient matches={matches} poolSlug={poolSlug} leagueSlug={leagueSlug} currentRound={currentRound} phases={phases} currentPhase={currentPhase} />
+      <PalpitesClient matches={matches} poolSlug={poolSlug} leagueSlug={leagueSlug} currentRound={currentRound} phases={phases} currentPhase={currentPhase} news={news} newsCategory={newsCategory} />
     </div>
   )
 }

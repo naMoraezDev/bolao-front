@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGuessesList, useCreateGuess } from '@/lib/queries'
 import MatchCard from '@/components/MatchCard'
 import AdBanner from '@/components/AdBanner'
+import NewsWidget from '@/components/NewsWidget'
 import { useAuth } from '@/contexts/auth'
-import type { Match, Guess } from '@/lib/types'
+import type { Match, Guess, NewsItem } from '@/lib/types'
 import { translatePhase } from '@/lib/phases'
 
 interface PalpitesClientProps {
@@ -15,9 +16,11 @@ interface PalpitesClientProps {
   currentRound?: string
   phases?: string[]
   currentPhase?: string
+  news?: NewsItem[]
+  newsCategory?: string | null
 }
 
-export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentRound, phases: rawPhases, currentPhase }: PalpitesClientProps) {
+export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentRound, phases: rawPhases, currentPhase, news, newsCategory }: PalpitesClientProps) {
   const { user, loading: authLoading } = useAuth()
   const { data: guessesData } = useGuessesList(poolSlug, leagueSlug, !!user && !authLoading)
   const createGuessMutation = useCreateGuess()
@@ -80,6 +83,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
     : null
 
   const [selectedPhase, setSelectedPhase] = useState<string | null>(defaultPhase)
+  const [finishedExpanded, setFinishedExpanded] = useState(false)
 
   const phaseMatches = hasPhases && selectedPhase
     ? matches.filter((m) => m.phase === selectedPhase)
@@ -110,6 +114,10 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
   }, [selectedPhase, showRoundSelector])
 
   const effectiveRound = showRoundSelector ? selectedRound : null
+
+  useEffect(() => {
+    setFinishedExpanded(false)
+  }, [selectedPhase, effectiveRound])
 
   const pendingMatches = effectiveRound
     ? phaseMatches.filter((m) => !m.finished && m.round === effectiveRound)
@@ -354,10 +362,26 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                   Finalizados
                 </h2>
                 <div className="space-y-2">
-                  {displayFinished.map((match) => (
+                  {(finishedExpanded ? displayFinished : displayFinished.slice(0, 5)).map((match) => (
                     <FinishedCard key={match.id} match={match} />
                   ))}
                 </div>
+                {displayFinished.length > 5 && !finishedExpanded && (
+                  <button
+                    onClick={() => setFinishedExpanded(true)}
+                    className="mt-2 w-full text-[11px] font-medium text-table-gray hover:text-green transition-colors py-1.5 rounded-lg hover:bg-green-cover-btn cursor-pointer border-none bg-transparent"
+                  >
+                    Ver todos os {displayFinished.length} resultados
+                  </button>
+                )}
+                {finishedExpanded && displayFinished.length > 5 && (
+                  <button
+                    onClick={() => setFinishedExpanded(false)}
+                    className="mt-2 w-full text-[11px] font-medium text-table-gray hover:text-green transition-colors py-1.5 rounded-lg hover:bg-green-cover-btn cursor-pointer border-none bg-transparent"
+                  >
+                    Mostrar menos
+                  </button>
+                )}
                 <div className="lg:sticky lg:top-20 mt-4">
                   <AdBanner variant="square" />
                 </div>
@@ -372,6 +396,10 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                     Resultados
                   </h2>
                   {renderMatchList(displayFinished, false)}
+                  <div className="mt-4">
+                    <AdBanner variant="horizontal" />
+                  </div>
+                  <NewsWidget news={news} category={newsCategory ?? undefined} />
                 </>
               )}
 
@@ -397,6 +425,10 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                     )}
                     {renderMatchList(displayPending, true)}
                   </div>
+                  <div className="mt-4">
+                    <AdBanner variant="horizontal" />
+                  </div>
+                  <NewsWidget news={news} category={newsCategory ?? undefined} />
                 </>
               )}
 
@@ -422,6 +454,10 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                     )}
                     {renderMatchList(displayPending, true)}
                   </div>
+                  <div className="mt-4">
+                    <AdBanner variant="horizontal" />
+                  </div>
+                  <NewsWidget news={news} category={newsCategory ?? undefined} />
                 </>
               )}
 

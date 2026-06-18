@@ -82,9 +82,9 @@ export default function MatchCard({
       isLive: !match.finished && !unprocessedResult && (match.locked || startsIn <= 0),
       isLocked: match.locked || match.finished || isPastCutoff || (hasGameScore && startsIn <= 0),
       isPreMatchLocked:
-        !match.locked && !match.finished && !hasGameScore && startsIn > 0 && startsIn <= HOUR_MS,
+        !match.locked && !match.finished && startsIn > 0 && startsIn <= HOUR_MS,
       isUnscheduled: false,
-      isOpen: !match.finished && !match.locked && !isPastCutoff && !hasGameScore,
+      isOpen: !match.finished && !match.locked && !isPastCutoff,
       showScore: match.finished || unprocessedResult,
       hasUnprocessedResult: unprocessedResult,
     };

@@ -24,7 +24,7 @@ export interface League {
   template?: Record<string, unknown>
   info?: Record<string, unknown>
   faq?: Record<string, unknown>
-  pool?: { id: string; name: string; slug: string; cover?: string; status?: PoolStatus }
+  pool?: { id: string; name: string; slug: string; cover?: string; status?: PoolStatus; newsCategory?: string | null }
   pools?: { pool: { id: string; name: string; slug: string; cover?: string; status?: PoolStatus; championshipId?: string } }[]
   accessRules?: { rule: 'PUBLIC' | 'INVITE_CODE' }[]
 }
@@ -166,4 +166,36 @@ export interface PoolMatchesData {
   currentRound?: string
   currentPhase?: string
   matches: Match[]
+}
+
+export interface NewsItem {
+  id: string
+  title: string
+  summary: string
+  source: string
+  url?: string
+  publishedAt: string
+  imageUrl?: string
+}
+
+export interface LanceNewsResponse {
+  data: {
+    itens: {
+      id: string
+      title: string
+      uri: string
+      date: string
+      extraFields: {
+        subtitle: string
+        image?: {
+          sourceUrl: string
+          altText?: string
+        }
+      }
+      category: {
+        name: string
+        slug: string
+      }
+    }[]
+  }
 }
