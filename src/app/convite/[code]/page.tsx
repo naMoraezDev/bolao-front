@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useJoinLeague } from '@/lib/queries'
 import { useAuth } from '@/contexts/auth'
+import Spinner from '@/components/Spinner'
 
 export default function JoinPage({
   params,
@@ -15,19 +16,21 @@ export default function JoinPage({
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const joinMutation = useJoinLeague()
+  const joinAttempted = useRef(false)
 
   useEffect(() => {
     params.then((p) => setCode(p.code))
   }, [params])
 
   useEffect(() => {
-    if (authLoading || !code) return
+    if (authLoading || !code || joinAttempted.current) return
 
     if (!user) {
       router.replace(`/auth?redirect=/convite/${code}`)
       return
     }
 
+    joinAttempted.current = true
     joinMutation
       .mutateAsync(code.toUpperCase())
       .then((data) => {
@@ -42,12 +45,12 @@ export default function JoinPage({
       .catch(() => {
         setError('Código inválido, expirado ou você já faz parte desta liga.')
       })
-  }, [user, authLoading, code, router, joinMutation])
+  }, [user, authLoading, code, router, joinMutation.mutateAsync])
 
   if (authLoading) {
     return (
       <div className="max-w-[1340px] mx-auto px-4 py-16 text-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green/30 border-t-green animate-spin mx-auto" />
+        <Spinner size="lg" />
       </div>
     )
   }
@@ -75,7 +78,7 @@ export default function JoinPage({
 
   return (
     <div className="max-w-[1340px] mx-auto px-4 py-16 text-center">
-      <div className="w-8 h-8 rounded-full border-2 border-green/30 border-t-green animate-spin mx-auto" />
+      <Spinner size="lg" />
       <p className="text-sm text-gray-400 mt-4">Entrando na liga...</p>
     </div>
   )

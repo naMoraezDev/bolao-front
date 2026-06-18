@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/auth'
 import { useLeagueParticipants, useRemoveParticipant } from '@/lib/queries'
 import Modal from './Modal'
+import Skeleton from './Skeleton'
+import Spinner from './Spinner'
 import type { Participant } from '@/lib/types'
 import Link from 'next/link'
 
@@ -63,13 +65,13 @@ export default function ParticipantsList({
     return (
       <div className="bg-white rounded-lg border border-line overflow-hidden">
         <div className="px-6 py-4 border-b border-line">
-          <div className="w-28 h-4 rounded bg-gray-200 animate-pulse" />
+          <Skeleton className="w-28 h-4" />
         </div>
         <div className="divide-y divide-line">
           {[1, 2, 3].map((i) => (
             <div key={i} className="px-6 py-3 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-              <div className="w-32 h-4 rounded bg-gray-200 animate-pulse" />
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <Skeleton className="w-32 h-4" />
             </div>
           ))}
         </div>
@@ -155,9 +157,7 @@ export default function ParticipantsList({
             className="flex-1 py-2.5 rounded-lg bg-red text-white text-sm font-semibold hover:bg-red-hover transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2 cursor-pointer border-none"
           >
             {removeMutation.isPending && (
-              <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" />
-              </svg>
+              <Spinner size="sm" />
             )}
             {removeMutation.isPending ? 'Removendo...' : 'Remover'}
           </button>

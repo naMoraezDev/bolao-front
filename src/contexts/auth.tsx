@@ -9,6 +9,7 @@ import {
   GoogleAuthProvider,
   type User,
 } from 'firebase/auth'
+import { useQueryClient } from '@tanstack/react-query'
 import { auth } from '@/lib/firebase'
 import { setAuthToken } from '@/lib/auth-token'
 
@@ -25,9 +26,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      const wasLoggedIn = !!user
+      const isNowLoggedIn = !!firebaseUser
+
       setUser(firebaseUser)
       if (firebaseUser) {
         const token = await firebaseUser.getIdToken()
@@ -36,9 +41,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuthToken(null)
       }
       setLoading(false)
+
+      if (wasLoggedIn !== isNowLoggedIn) {
+        queryClient.clear()
+      }
     })
     return unsubscribe
-  }, [])
+  }, [user, queryClient])
 
   const signIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password)
@@ -49,13 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithPopup(auth, provider)
   }
 
-  const signOut = async () => {
+  const signOutHandler = async () => {
     await firebaseSignOut(auth)
     setAuthToken(null)
+    queryClient.clear()
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signInWithGoogle, signOut: signOutHandler }}>
       {children}
     </AuthContext.Provider>
   )

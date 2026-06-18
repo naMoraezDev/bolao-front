@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from 'react'
 import { useCreateInvite } from '@/lib/queries'
 import Modal from './Modal'
 import FadeIn from './FadeIn'
+import Spinner from './Spinner'
 
 interface InviteModalProps {
   leagueSlug: string
@@ -88,7 +89,7 @@ export default function InviteModal({ leagueSlug, open, onClose }: InviteModalPr
       <FadeIn show={createInviteMutation.isPending}>
         <div className="px-6 pb-8 text-center">
           <div className="w-12 h-12 rounded-xl bg-green-cover-bg flex items-center justify-center mx-auto mb-4">
-            <div className="w-5 h-5 rounded-full border-2 border-green/30 border-t-green animate-spin" />
+            <Spinner size="sm" />
           </div>
           <p className="text-sm text-gray-400">Gerando convite...</p>
         </div>

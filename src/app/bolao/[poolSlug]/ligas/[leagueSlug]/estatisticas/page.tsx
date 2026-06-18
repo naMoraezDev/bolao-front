@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/contexts/auth'
 import { useUserStats, useLeagueDetail, usePublicUserStats, useCreateShareToken } from '@/lib/queries'
 import Tabs from '@/components/Tabs'
+import Spinner from '@/components/Spinner'
 import AdBanner from '@/components/AdBanner'
 
 export default function EstatisticasPage({
@@ -40,7 +41,7 @@ export default function EstatisticasPage({
   if (!isSharedView && authLoading) {
     return (
       <div className="max-w-[1340px] mx-auto px-4 py-16 text-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green/30 border-t-green animate-spin mx-auto" />
+        <Spinner size="lg" />
       </div>
     )
   }
@@ -131,7 +132,7 @@ export default function EstatisticasPage({
       <div className="mt-6">
         {isLoading ? (
           <div className="text-center py-16">
-            <div className="w-8 h-8 rounded-full border-2 border-green/30 border-t-green animate-spin mx-auto" />
+            <Spinner size="lg" />
           </div>
         ) : error || !stats ? (
           isSharedView && error?.message?.includes('expirou') ? (

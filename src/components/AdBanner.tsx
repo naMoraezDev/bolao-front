@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { config } from '@/lib/config'
 
 interface AdBannerProps {
   variant?: 'horizontal' | 'square'
@@ -46,6 +47,8 @@ const bookmakers = [
 ]
 
 export default function AdBanner({ variant = 'horizontal' }: AdBannerProps) {
+  if (!config.ads.enabled) return null
+
   const [mounted, setMounted] = useState(false)
   const [bookmakerIdx, setBookmakerIdx] = useState(0)
 

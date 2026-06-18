@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useGuessesList, useCreateGuess } from '@/lib/queries'
+import { useGuessesList, useCreateGuess, useUserStats } from '@/lib/queries'
 import MatchCard from '@/components/MatchCard'
 import AdBanner from '@/components/AdBanner'
 import NewsWidget from '@/components/NewsWidget'
+import Skeleton from '@/components/Skeleton'
 import { useAuth } from '@/contexts/auth'
 import type { Match, Guess, NewsItem } from '@/lib/types'
 import { translatePhase } from '@/lib/phases'
@@ -24,6 +25,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
   const { user, loading: authLoading } = useAuth()
   const { data: guessesData } = useGuessesList(poolSlug, leagueSlug, !!user && !authLoading)
   const createGuessMutation = useCreateGuess()
+  const { data: userStats, isLoading: statsLoading } = useUserStats(poolSlug, leagueSlug)
 
   const [guesses, setGuesses] = useState<Record<string, Guess>>({})
   const [savingMatches, setSavingMatches] = useState<Record<string, boolean>>({})
@@ -211,6 +213,62 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
 
   return (
     <div className="space-y-4">
+      {user && (
+        userStats ? (
+        <div className="bg-white rounded-lg border border-green/20 overflow-hidden">
+          {userStats.totalGuesses === 0 ? (
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-12 h-12 rounded-full bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden ring-2 ring-green/10">
+                {userStats.avatarUrl ? (
+                  <img src={userStats.avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-lg font-bold text-green">
+                    {(userStats.name ?? '?')[0].toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-gray-300 truncate">{userStats.name}</p>
+                <p className="text-sm text-gray-300">Faça seu primeiro palpite e entre no ranking!</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-12 h-12 rounded-full bg-green-cover-bg flex items-center justify-center flex-shrink-0 overflow-hidden ring-2 ring-green/10">
+                {userStats.avatarUrl ? (
+                  <img src={userStats.avatarUrl} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-lg font-bold text-green">
+                    {(userStats.name ?? '?')[0].toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-gray-300 truncate">{userStats.name}</p>
+                <p className="text-xl font-bold text-green">{userStats.totalScore} <span className="text-xs font-normal text-gray-300">pts</span></p>
+              </div>
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-gray-500">#{userStats.position}º</p>
+                  <p className="text-[10px] text-gray-300">{userStats.totalGuesses} palpites</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        ) : statsLoading ? (
+          <div className="bg-white rounded-lg border border-line p-5">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="w-32 h-3" />
+                <Skeleton className="w-20 h-6" />
+              </div>
+              <Skeleton className="w-16 h-8" />
+            </div>
+          </div>
+        ) : null
+      )}
       {hasPhases && (
         <div className="flex items-center justify-center gap-2 flex-wrap">
           {phases.map((phase) => (

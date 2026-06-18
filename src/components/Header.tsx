@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/auth'
 import { motion, AnimatePresence } from 'framer-motion'
+import Skeleton from './Skeleton'
 
 const navLinks = [
   { label: 'Início', href: '/' },
@@ -62,9 +63,7 @@ export default function Header() {
 
         <div className="flex items-center gap-3">
           {loading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
-            </div>
+            <Skeleton className="w-8 h-8 rounded-full" />
           ) : user ? (
             <div className="relative" ref={menuRef}>
               <button

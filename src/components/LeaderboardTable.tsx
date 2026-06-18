@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useLeaderboardUserEntries } from '@/lib/queries'
 import type { LeaderboardEntry } from '@/lib/types'
+import Spinner from './Spinner'
 
 const guessBadge = (score: number) => {
   if (score === 10) return { label: 'Exato', style: 'bg-green text-white' }
@@ -127,7 +128,7 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
                     <div className="border-b border-line bg-gray-50/50">
                       {loading ? (
                         <div className="px-4 py-6 text-center">
-                          <div className="w-6 h-6 rounded-full border-2 border-green/30 border-t-green animate-spin mx-auto" />
+                          <Spinner size="md" />
                         </div>
                       ) : details && details.length > 0 ? (
                         <table className="w-full">

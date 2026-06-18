@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
+import StickyAdFooter from "@/components/StickyAdFooter"
 import { AuthProvider } from "@/contexts/auth"
 import { QueryProvider } from "@/lib/query-provider"
 
@@ -25,6 +26,7 @@ export default function RootLayout({
             <main className="flex-1">
               {children}
             </main>
+            <StickyAdFooter />
             <Footer />
           </AuthProvider>
         </QueryProvider>

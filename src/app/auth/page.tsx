@@ -1,16 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth'
 
 export default function AuthPage() {
-  const { signIn, signInWithGoogle } = useAuth()
+  const { user, loading: authLoading, signIn, signInWithGoogle } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(redirectTo)
+    }
+  }, [authLoading, user, redirectTo, router])
 
   async function handleEmailSignIn(e: React.FormEvent) {
     e.preventDefault()
@@ -18,7 +26,7 @@ export default function AuthPage() {
     setLoading(true)
     try {
       await signIn(email, password)
-      router.push('/')
+      router.push(redirectTo)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {
@@ -31,13 +39,15 @@ export default function AuthPage() {
     setLoading(true)
     try {
       await signInWithGoogle()
-      router.push('/')
+      router.push(redirectTo)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login com Google')
     } finally {
       setLoading(false)
     }
   }
+
+  if (authLoading) return null
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] px-4">

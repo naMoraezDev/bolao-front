@@ -7,6 +7,7 @@ import { useUserLeagues } from '@/lib/queries'
 import { useAuth } from '@/contexts/auth'
 import CreateLeagueModal from './CreateLeagueModal'
 import JoinLeagueModal from './JoinLeagueModal'
+import Skeleton from './Skeleton'
 import type { UserLeague, League } from '@/lib/types'
 import LeagueBadge from './LeagueBadge'
 import PoolStatusBadge from './PoolStatusBadge'
@@ -69,13 +70,13 @@ export default function PoolLeagueManager({ poolSlug, poolName, poolStatus, defa
             <div key={i} className="bg-white rounded-lg border border-line p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gray-200 animate-pulse" />
+                  <Skeleton className="w-10 h-10 rounded-lg" />
                   <div className="space-y-2">
-                    <div className="w-28 h-4 rounded bg-gray-200 animate-pulse" />
-                    <div className="w-20 h-3 rounded bg-gray-200 animate-pulse" />
+                    <Skeleton className="w-28 h-4" />
+                    <Skeleton className="w-20 h-3" />
                   </div>
                 </div>
-                <div className="w-4 h-4 rounded bg-gray-200 animate-pulse" />
+                <Skeleton className="w-4 h-4" />
               </div>
             </div>
           ))}

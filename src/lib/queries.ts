@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
+import { useAuth } from '@/contexts/auth'
 import type { Pool, PoolDetails, PoolMatchesData } from './types'
 import type { League, Participant, CreatedLeague, LeagueInvite, JoinedLeague } from './types'
 import type { Guess, LeaderboardEntry, LeaderboardEntryDetail, UserStats } from './types'
@@ -86,17 +87,20 @@ export function useLeagueParticipants(poolSlug: string, leagueSlug: string) {
 }
 
 export function useUserLeagues() {
+  const { user } = useAuth()
   return useQuery({
     queryKey: queryKeys.user.leagues(),
     queryFn: () => api.user.leagues(),
+    enabled: !!user,
   })
 }
 
 export function useUserStats(poolSlug: string, leagueSlug: string) {
+  const { user } = useAuth()
   return useQuery({
     queryKey: queryKeys.user.stats(poolSlug, leagueSlug),
     queryFn: () => api.user.getStats(poolSlug, leagueSlug),
-    enabled: !!poolSlug && !!leagueSlug,
+    enabled: !!poolSlug && !!leagueSlug && !!user,
   })
 }
 
