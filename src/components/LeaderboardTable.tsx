@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useLeaderboardUserEntries } from '@/lib/queries'
 import type { LeaderboardEntry } from '@/lib/types'
 import Spinner from './Spinner'
+import FadeIn from './FadeIn'
 
 const guessBadge = (score: number) => {
   if (score === 10) return { label: 'Exato', style: 'bg-green text-white' }
@@ -131,6 +132,7 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
                           <Spinner size="md" />
                         </div>
                       ) : details && details.length > 0 ? (
+                        <FadeIn show>
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-line bg-gray-100/50">
@@ -200,6 +202,7 @@ export default function LeaderboardTable({ entries, poolSlug, leagueSlug }: Lead
                             ))}
                           </tbody>
                         </table>
+                        </FadeIn>
                       ) : (
                         <div className="px-4 py-6 text-center">
                           <p className="text-xs text-gray-300">Nenhum palpite encontrado.</p>

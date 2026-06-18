@@ -6,6 +6,7 @@ import { useLeagueParticipants, useRemoveParticipant } from '@/lib/queries'
 import Modal from './Modal'
 import Skeleton from './Skeleton'
 import Spinner from './Spinner'
+import FadeIn from './FadeIn'
 import type { Participant } from '@/lib/types'
 import Link from 'next/link'
 
@@ -47,17 +48,19 @@ export default function ParticipantsList({
 
   if (!user) {
     return (
-      <div className="bg-white rounded-lg border border-line p-8 text-center">
-        <p className="text-gray-300 text-sm mb-4">
-          Faça login para ver os participantes desta liga.
-        </p>
-        <Link
-          href="/auth"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-green text-white text-sm font-semibold rounded-normal hover:bg-green-hover transition-colors no-underline"
-        >
-          Entrar
-        </Link>
-      </div>
+      <FadeIn show>
+        <div className="bg-white rounded-lg border border-line p-8 text-center">
+          <p className="text-gray-300 text-sm mb-4">
+            Faça login para ver os participantes desta liga.
+          </p>
+          <Link
+            href="/auth"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-green text-white text-sm font-semibold rounded-normal hover:bg-green-hover transition-colors no-underline"
+          >
+            Entrar
+          </Link>
+        </div>
+      </FadeIn>
     )
   }
 
@@ -81,6 +84,7 @@ export default function ParticipantsList({
 
   return (
     <>
+      <FadeIn show={!loading}>
       <div className="bg-white rounded-lg border border-line overflow-hidden">
         <div className="px-6 py-4 border-b border-line">
           <h2 className="font-semibold text-gray-500 text-sm">
@@ -129,6 +133,7 @@ export default function ParticipantsList({
           )}
         </div>
       </div>
+      </FadeIn>
 
       {/* Confirm Remove Modal */}
       <Modal open={!!removeTarget} onClose={() => !removeMutation.isPending && setRemoveTarget(null)} className="w-full max-w-sm">

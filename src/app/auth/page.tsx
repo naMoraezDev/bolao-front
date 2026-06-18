@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/auth'
+import FadeIn from '@/components/FadeIn'
 
 export default function AuthPage() {
   const { user, loading: authLoading, signIn, signInWithGoogle } = useAuth()
@@ -101,7 +102,9 @@ export default function AuthPage() {
         </button>
 
         {error && (
+          <FadeIn show>
           <p className="mt-4 text-sm text-red-500 text-center">{error}</p>
+          </FadeIn>
         )}
       </div>
     </div>

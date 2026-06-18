@@ -1,6 +1,7 @@
 'use client'
 
 import type { NewsItem } from '@/lib/types'
+import FadeIn from './FadeIn'
 
 const GRADIENTS = [
   'from-blue-600 to-blue-800',
@@ -33,6 +34,7 @@ export default function NewsWidget({ news, category }: Props) {
   if (items.length === 0) return null
 
   return (
+    <FadeIn show>
     <div className="mt-6">
       <div className="flex items-center justify-between mb-3 px-1">
         <h2 className="text-sm font-semibold text-table-gray uppercase tracking-wide">
@@ -94,5 +96,6 @@ export default function NewsWidget({ news, category }: Props) {
         </a>
       </div>
     </div>
+    </FadeIn>
   )
 }

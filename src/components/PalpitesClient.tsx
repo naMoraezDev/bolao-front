@@ -6,6 +6,7 @@ import MatchCard from '@/components/MatchCard'
 import AdBanner from '@/components/AdBanner'
 import NewsWidget from '@/components/NewsWidget'
 import Skeleton from '@/components/Skeleton'
+import FadeIn from '@/components/FadeIn'
 import { useAuth } from '@/contexts/auth'
 import type { Match, Guess, NewsItem } from '@/lib/types'
 import { translatePhase } from '@/lib/phases'
@@ -213,6 +214,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
 
   return (
     <div className="space-y-4">
+      <FadeIn show={!!user && !authLoading}>
       {user && (
         userStats ? (
         <div className="bg-white rounded-lg border border-green/20 overflow-hidden">
@@ -269,6 +271,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
           </div>
         ) : null
       )}
+      </FadeIn>
       {hasPhases && (
         <div className="flex items-center justify-center gap-2 flex-wrap">
           {phases.map((phase) => (
@@ -468,6 +471,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                   </h2>
                   <div className="space-y-3">
                     {!user && !authLoading && (
+                      <FadeIn show>
                       <div className="bg-amber-50 border border-amber-200 rounded-lg px-5 py-4 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 min-w-0">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-amber-600 flex-shrink-0">
@@ -480,6 +484,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                           Entrar
                         </a>
                       </div>
+                      </FadeIn>
                     )}
                     {renderMatchList(displayPending, true)}
                   </div>
@@ -497,6 +502,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                   </h2>
                   <div className="space-y-3">
                     {!user && !authLoading && (
+                      <FadeIn show>
                       <div className="bg-amber-50 border border-amber-200 rounded-lg px-5 py-4 flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3 min-w-0">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-amber-600 flex-shrink-0">
@@ -509,6 +515,7 @@ export default function PalpitesClient({ matches, poolSlug, leagueSlug, currentR
                           Entrar
                         </a>
                       </div>
+                      </FadeIn>
                     )}
                     {renderMatchList(displayPending, true)}
                   </div>

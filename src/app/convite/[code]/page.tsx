@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useJoinLeague } from '@/lib/queries'
 import { useAuth } from '@/contexts/auth'
 import Spinner from '@/components/Spinner'
+import FadeIn from '@/components/FadeIn'
 
 export default function JoinPage({
   params,
@@ -57,6 +58,7 @@ export default function JoinPage({
 
   if (error) {
     return (
+      <FadeIn show>
       <div className="max-w-[1340px] mx-auto px-4 py-16 text-center">
         <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-red">
@@ -73,6 +75,7 @@ export default function JoinPage({
           Voltar para Início
         </a>
       </div>
+      </FadeIn>
     )
   }
 
