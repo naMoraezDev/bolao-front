@@ -1,6 +1,6 @@
-import Link from "next/link"
 import PoolCard from "@/components/PoolCard"
 import AdBanner from "@/components/AdBanner"
+import EmptyState from "@/components/EmptyState"
 import { api } from "@/lib/api"
 import type { Pool } from "@/lib/types"
 
@@ -38,23 +38,12 @@ export default async function PoolsPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-line p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-gray-300">
-                  <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-              </div>
-              <p className="text-gray-300 text-sm mb-4">
-                Nenhum bolão disponível no momento.
-              </p>
-              <Link
-                href="/"
-                className="text-sm font-semibold text-green hover:text-green-hover transition-colors"
-              >
-                Voltar para Início
-              </Link>
-            </div>
+            <EmptyState
+              icon="pool"
+              title="Nenhum bolão encontrado"
+              message="Não há bolões disponíveis no momento. Volte mais tarde para conferir as novidades!"
+              action={{ label: "Voltar para Início", href: "/" }}
+            />
           )}
         </div>
 

@@ -5,6 +5,7 @@ import JoinLeagueButton from "@/components/JoinLeagueButton"
 import PoolStatusBadge from "@/components/PoolStatusBadge"
 import LeagueBadge from "@/components/LeagueBadge"
 import AdBanner from "@/components/AdBanner"
+import EmptyState from "@/components/EmptyState"
 
 export const dynamic = "force-dynamic"
 
@@ -85,22 +86,12 @@ export default async function PublicLeaguesPage() {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-line p-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-gray-300">
-              <path d="M12 2L15 8L22 9L17 14L18 21L12 17.5L6 21L7 14L2 9L9 8L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <p className="text-gray-300 text-sm mb-4">
-            Nenhuma liga pública disponível no momento.
-          </p>
-          <Link
-            href="/"
-            className="text-sm font-semibold text-green hover:text-green-hover transition-colors"
-          >
-            Voltar para Início
-          </Link>
-        </div>
+        <EmptyState
+          icon="league"
+          title="Nenhuma liga pública"
+          message="Não há ligas públicas disponíveis no momento. Crie uma nova liga ou volte mais tarde para conferir!"
+          action={{ label: "Voltar para Início", href: "/" }}
+        />
       )}
 
         </div>

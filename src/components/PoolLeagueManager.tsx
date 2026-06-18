@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/auth'
 import CreateLeagueModal from './CreateLeagueModal'
 import JoinLeagueModal from './JoinLeagueModal'
 import Skeleton from './Skeleton'
-import FadeIn from './FadeIn'
+import EmptyState from './EmptyState'
 import type { UserLeague, League } from '@/lib/types'
 import LeagueBadge from './LeagueBadge'
 import PoolStatusBadge from './PoolStatusBadge'
@@ -125,13 +125,15 @@ export default function PoolLeagueManager({ poolSlug, poolName, poolStatus, defa
           ))}
         </motion.div>
       ) : (
-        <FadeIn show>
-        <div className="bg-white rounded-lg border border-line p-8 text-center">
-          <p className="text-gray-300 text-sm">
-            {user ? 'Nenhuma liga encontrada. Crie ou entre em uma liga!' : 'Faça login para ver suas ligas.'}
-          </p>
-        </div>
-        </FadeIn>
+        <EmptyState
+          icon="league"
+          compact
+          message={
+            user
+              ? 'Nenhuma liga encontrada. Crie ou entre em uma liga!'
+              : 'Faça login para ver suas ligas.'
+          }
+        />
       )}
 
       <CreateLeagueModal

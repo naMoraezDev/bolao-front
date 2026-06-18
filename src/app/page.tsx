@@ -1,6 +1,7 @@
 import Link from "next/link"
 import PoolCard from "@/components/PoolCard"
 import AdBanner from "@/components/AdBanner"
+import EmptyState from "@/components/EmptyState"
 import { api } from "@/lib/api"
 import type { Pool, League } from "@/lib/types"
 
@@ -78,35 +79,30 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-line p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-gray-300">
-                <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" strokeWidth="1.5" />
-                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            </div>
-            <p className="text-gray-300 text-sm">
-              Nenhum bolão disponível no momento.
-            </p>
-          </div>
+          <EmptyState
+            icon="pool"
+            compact
+            message="Nenhum bolão disponível no momento."
+            action={{ label: "Ver todos os bolões", href: "/bolao" }}
+          />
         )}
       </section>
 
       {/* Ligas em Destaque */}
-      {publicLeagues.length > 0 && (
-        <section className="bg-white border-t border-line">
-          <div className="max-w-[1340px] mx-auto px-4 py-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-2xl md:text-3xl font-bold text-black-lance">
-                Ligas em Destaque
-              </h2>
-              <Link
-                href="/ligas"
-                className="text-sm font-semibold text-green hover:text-green-hover transition-colors no-underline"
-              >
-                Ver todas
-              </Link>
-            </div>
+      <section className="bg-white border-t border-line">
+        <div className="max-w-[1340px] mx-auto px-4 py-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-black-lance">
+              Ligas em Destaque
+            </h2>
+            <Link
+              href="/ligas"
+              className="text-sm font-semibold text-green hover:text-green-hover transition-colors no-underline"
+            >
+              Ver todas
+            </Link>
+          </div>
+          {publicLeagues.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {publicLeagues.slice(0, 6).map((league) => {
                 const firstPool = league.pools?.[0]?.pool ?? league.pool ?? null
@@ -144,9 +140,16 @@ export default async function HomePage() {
                 )
               })}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <EmptyState
+              icon="league"
+              compact
+              message="Nenhuma liga pública disponível no momento."
+              action={{ label: "Ver todas as ligas", href: "/ligas" }}
+            />
+          )}
+        </div>
+      </section>
 
       {/* Por que Participar */}
       <section className="bg-white border-t border-line">
